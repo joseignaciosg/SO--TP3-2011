@@ -207,9 +207,9 @@ int
 kmain()
 {
 	int i, h;
+	char * buffer = calloc(512 , 1);
 	_Cli();
 	k_clear_screen();
-	init_malloc();
 
 	initializeSemaphoreTable();
 	initializeIDT();
@@ -218,7 +218,6 @@ kmain()
 	_StartCR3();
 	SetupScheduler();
 
-	char * buffer = calloc(512,1);
 
 	for(h = 0; h < 200; h++){
 		write_disk(0,h,buffer,BLOCK_SIZE,0);
@@ -266,8 +265,13 @@ PROCESS * GetProcessByPID(int pid)
 int CreateProcessAt_in_kernel(createProcessParam * param)
 {
 	PROCESS * proc;
-	void * stack = malloc(param->stacklength);
+	int stack;
+	printf("creating process...\n");
 	proc = malloc(sizeof(PROCESS));
+	proc->pdir = create_proc_table();
+	printf("stack crated\n");
+	stack = get_stack_start(proc->pdir);
+	printf("teta\n");
 	proc->name = (char*)malloc(15);
 	proc->pid = nextPID;
 	proc->foreground = param->isFront;
@@ -277,12 +281,15 @@ int CreateProcessAt_in_kernel(createProcessParam * param)
 	proc->tty = param->tty;
 	proc->stacksize = param->stacklength;
 	proc->stackstart = (int)stack;
+	printf("peron\n");
 	proc->ESP = LoadStackFrame(param->process,param->argc,param->argv,(int)(stack + param->stacklength - 1), end_process);
+	printf("stack frame created\n");
 	proc->parent = CurrentPID;
 	proc->waitingPid = 0;
 	proc->sleep = 0;
 	proc->acum = param->priority + 1;
 	set_Process_ready(proc);
+	printf("process ready\n");
 
 	return proc->pid;
 }
@@ -290,14 +297,18 @@ int CreateProcessAt_in_kernel(createProcessParam * param)
 
 int LoadStackFrame(int(*process)(int,char**),int argc,char** argv, int bottom, void(*cleaner)())
 {
+	printf("chino\n");
 	STACK_FRAME * frame = (STACK_FRAME*)(bottom - sizeof(STACK_FRAME));
+	printf("chino2\n");
 	frame->EBP = 0;
+	printf("chino3\n");
 	frame->EIP = (int)process;
 	frame->CS = 0x08;
 	frame->EFLAGS = 0;
 	frame->retaddr = cleaner;
 	frame->argc = argc;
 	frame->argv = argv;
+	printf("chino4\n");
 	return (int)frame;
 }
 
@@ -376,7 +387,6 @@ void end_process(void)
 	PROCESS * proc;
 	PROCESS * parent;
 	processNode * aux;
-	processNode * erase;
 	int i;
 	
 	_Cli();
@@ -400,14 +410,7 @@ void end_process(void)
 		while(aux->next != NULL && ((processNode *)aux->next)->process->pid != CurrentPID)
 			aux = ((processNode *)aux->next);
 		if(aux->next !=  NULL)
-		{
-			erase = ((processNode *)aux->next);
 			aux->next = ((processNode*)aux->next)->next;
-			free(erase);
-			free(erase->process->name);
-			free(erase->process->stackstart);
-			free(erase->process);
-		}
 	}
 
 	for(i = 0; i < 100; i++)
@@ -424,7 +427,6 @@ void kill_in_kernel(int pid)
 	PROCESS * proc;
 	PROCESS * parent;
 	processNode * aux;
-	processNode * erase;
 	int i,j;
 
 	_Cli();
@@ -465,14 +467,7 @@ void kill_in_kernel(int pid)
 		while(aux->next != NULL && ((processNode *)aux->next)->process->pid != pid)
 			aux = ((processNode *)aux->next);
 		if(aux->next !=  NULL)
-		{
-			erase = ((processNode *)aux->next);
 			aux->next = ((processNode*)aux->next)->next;
-			free(erase);
-			free(erase->process->name);
-			free(erase->process->stackstart);
-			free(erase->process);
-		}
 	}
 
 	for(i = 0; i < 100; i++)
@@ -749,7 +744,6 @@ void logUser(void)
 	terminals[1].PID = CreateProcessAt("Shell1", (int(*)(int, char**))shell, 1, 0, (char**)0, 0x400, 2, 1);
 	terminals[2].PID = CreateProcessAt("Shell2", (int(*)(int, char**))shell, 2, 0, (char**)0, 0x400, 2, 1);
 	terminals[3].PID = CreateProcessAt("Shell3", (int(*)(int, char**))shell, 3, 0, (char**)0, 0x400, 2, 1);
-	free(usr);
 	do_close(fd);
 	_Sti();
 	return;
@@ -802,7 +796,6 @@ void createusr(char * name, char * password, char * group)
 	rmDir("usersfile");
 	fd = do_creat("usersfile", 777);
 	write(fd, (void *)usr, sizeof(user) * 100);
-	free(usr);
 	do_close(fd);
 
 	current = aux;

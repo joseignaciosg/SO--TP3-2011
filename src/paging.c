@@ -20,7 +20,9 @@ static void create_page(void * addr);
 static ptable_entry get_dir_entry(int address, int perms);
 static ptable_entry get_table_entry(int address, int perms);
 inline static uint32_t get_dir_entry_add(int entry);
+static void set_proc_ptable( uint32_t offset );
 
+static uint32_t dirs[1024 * 1024] = {0};
 
 void initializePaging(void)
 {
@@ -78,5 +80,43 @@ static ptable_entry get_table_entry(int address, int perms)
 inline static uint32_t get_dir_entry_add(int entry)
 {
 	return entry & 0xFFFFF000;
+}
+
+int create_proc_table( void ) {
+
+    int i;
+    for ( i = 0 ; i < 1024 * 1024; i ++ ) {
+		if(dirs[i] == 0) {
+			set_proc_ptable( i );
+			dirs[i] = 1;
+			return i;
+		}
+	}
+    return -1;
+}
+
+uint32_t get_stack_start( uint32_t pdir_offset ) {
+  
+    return USER_VIRTUAL_MEM_START + pdir_offset * PAGE_SIZE * PAGES_PER_TABLE;
+}
+
+static void set_proc_ptable( uint32_t offset ) {
+
+	pdir_entry *dir = (pdir_entry *)P_DIR_START;
+	
+	//Get the virtual address for the process
+	uint32_t mem = USER_VIRTUAL_MEM_START + PAGE_SIZE * 1024 * offset;
+	dir += (mem >> 22);
+	//Adress of the start of the process' page table
+	ptable_entry * table = (ptable_entry  *) (P_TABLE_USER_START + offset * PAGE_SIZE);
+	
+	//Fill the directory entry for the process' page table
+	*dir = get_dir_entry( (uint32_t) table, RWUPRESENT);
+	int i = 0;
+
+	//Sets all page table entries as not present, not initialized
+	for( i = 0 ; i < PAGES_PER_TABLE ; i ++ ) {
+		table[i] = 0;
+	}
 }
 

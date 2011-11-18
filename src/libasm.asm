@@ -299,9 +299,6 @@ _StartCR3:
 	push ebp
 	mov ebp,esp
 
-	mov  ebx, 0xb8000
-	mov  eax, 0
-
 	mov eax, 0x08000000
 	mov cr3, eax
  

@@ -9,10 +9,10 @@
 ***********************************/
 
 #include "../include/malloc.h"
+#include "../include/defs.h"
 
 
-typedef unsigned int  size_t;
-#define NULL 0
+//typedef unsigned int  size_t;
 
 /*
  * If MAX_MEMORY_IN_MB isn't set, then it defaults to 200 MB
@@ -153,48 +153,16 @@ static size_t last_chunk_size = 0;
  * @return the number of the bin, or 0 if an error ocurred
  *
  */
-inline
-static size_t find_bin ( size_t size ) {				/*se puede cambiar por busqueda lineal*/
+static size_t find_bin ( size_t size ) {
+
+	int i;
 
 	if ( size > bin_sizes[ BIN_NUMBER - 1 ] )
 		return 0;
 
-	size_t min_bin = 0, max_bin = BIN_NUMBER , curr_bin;
-
-	while( min_bin + 1 != max_bin ) {
-
-		curr_bin = ( min_bin + max_bin ) >> 1;
-
-		if ( bin_sizes[curr_bin] <= size )
-			min_bin = curr_bin;
-		else
-			max_bin = curr_bin;
-	}
-
-	return min_bin;
-}
-
-
-/**
- * Finds the first chunk of memory >= to a given size in a given bin
- *
- * @param bin   the bin to explore
- * @param size  the minimum size of the chunk
- *
- * @return the starting position of the chunk
- *
- */
-inline
-static size_t find_chunk ( size_t bin, size_t size ) {
-
-	size_t chunk = BINS[bin].next_pos;
-
-	while( chunk != BIN_ABSOLUTE_POS( bin ) &&
-			GET_FREE_HEADER( chunk )->size < size ) {
-		chunk = GET_FREE_HEADER( chunk )->next_pos;
-	}
-
-	return chunk;
+	for(i = 0; i < BIN_NUMBER; i++)
+		if(bin_sizes[i] >= size)
+			return i;
 }
 
 
@@ -211,14 +179,11 @@ static size_t find_chunk ( size_t bin, size_t size ) {
  * @return the starting position of the chunk
  *
  */
-inline
-static size_t find_upper_chunk ( size_t bin, size_t size ) {
+static size_t find_chunk ( size_t bin, size_t size ) {
 
 	size_t chunk = BINS[bin].next_pos;
 
-	while( chunk != BIN_ABSOLUTE_POS( bin ) &&
-		GET_FREE_HEADER( chunk )->size <= size ) {
-
+	while( chunk != BIN_ABSOLUTE_POS( bin ) && GET_FREE_HEADER( chunk )->size <= size ) {
 		chunk = GET_FREE_HEADER( chunk )->next_pos;
 	}
 
@@ -274,7 +239,7 @@ void init_malloc () {
  * @return  a pointer to the first chunk (wich is setted "inuse")
  *
  */
-static void* split ( size_t chunk, size_t size ) {
+static void * split ( size_t chunk, size_t size ) {
 
 	size_t left_size = GET_FREE_HEADER( chunk )->size - size;
 
@@ -300,7 +265,7 @@ static void* split ( size_t chunk, size_t size ) {
 		GET_FOOTER( chunk + size + left_size - sizeof( struct footer ) )->size = left_size;
 
 		/* set free */
-		size_t upper_chunk = find_upper_chunk( find_bin( left_size ), left_size );
+		size_t upper_chunk = find_chunk( find_bin( left_size ), left_size );
 
 		second_header->prev_pos = GET_FREE_HEADER( upper_chunk )->prev_pos;
 		second_header->next_pos = upper_chunk;
@@ -396,8 +361,7 @@ void free ( void* data ) {
 
 	//assert( pos >= MEMORY_START && pos < MEMORY_END );
 	//assert( pos + GET_INUSE_HEADER(pos)->size <= MEMORY_END );
-	//assert( GET_INUSE_HEADER(pos)->size ==
-	//		GET_FOOTER( pos + GET_INUSE_HEADER(pos)->size - sizeof( struct footer ) )->size );
+	//assert( GET_INUSE_HEADER(pos)->size == GET_FOOTER( pos + GET_INUSE_HEADER(pos)->size - sizeof( struct footer ) )->size );
 	//assert( GET_INUSE_HEADER(pos)->status == INUSE_STATUS );
 
 	free_memory += GET_INUSE_HEADER( pos )->size;
@@ -437,8 +401,7 @@ void free ( void* data ) {
 		struct free_header* next_header = GET_FREE_HEADER( pos + header->size );
 
 		//assert( pos + header->size + next_header->size <= MEMORY_END );
-		//assert( next_header->size ==
-		//	GET_FOOTER( pos + header->size + next_header->size - sizeof( struct footer ) )->size );
+		//assert( next_header->size == GET_FOOTER( pos + header->size + next_header->size - sizeof( struct footer ) )->size );
 
 		if ( next_header->status == FREE_STATUS ) {
 
@@ -456,7 +419,7 @@ void free ( void* data ) {
 	GET_FOOTER( pos + header->size - sizeof( struct footer ) )->size = header->size;
 
 	/* set free */
-	size_t chunk = find_upper_chunk( find_bin( header->size ), header->size );
+	size_t chunk = find_chunk( find_bin( header->size ), header->size );
 
 	header->prev_pos = GET_FREE_HEADER( chunk )->prev_pos;
 	header->next_pos = chunk;

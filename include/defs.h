@@ -90,7 +90,7 @@ enum  groups{ ADMIN = 0, USR};
 typedef enum groups groupID;
 
 
-typedef int size_t;
+typedef unsigned int size_t;
 typedef short int ssize_t;
 /* Descriptor de segmento *///GDT
 typedef struct {

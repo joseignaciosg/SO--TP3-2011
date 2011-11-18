@@ -40,7 +40,7 @@ k_clear_screen()
 
 
 void
-writeScreen(char* buffer, int count)
+writeScreen(char* buffer, size_t count)
 {
 	int j = 0;
 
@@ -77,7 +77,7 @@ writeScreen(char* buffer, int count)
 
 
 void
-eraseScreen(char* buffer, int count)
+eraseScreen(char* buffer, size_t count)
 {
 	int j = 0;
 	if (terminals[currentTTY].curpos > 0) {

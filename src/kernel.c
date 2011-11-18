@@ -305,8 +305,8 @@ void set_Process_ready(PROCESS * proc)
 {
 	processNode * node;
 	processNode * aux;
+
 	node = malloc(sizeof(processNode));
-	aux = malloc(sizeof(processNode));
 	node->next = NULL;
 	node->process = proc;
 	if(ready == NULL)
@@ -376,6 +376,7 @@ void end_process(void)
 	PROCESS * proc;
 	PROCESS * parent;
 	processNode * aux;
+	processNode * erase;
 	int i;
 	
 	_Cli();
@@ -399,7 +400,14 @@ void end_process(void)
 		while(aux->next != NULL && ((processNode *)aux->next)->process->pid != CurrentPID)
 			aux = ((processNode *)aux->next);
 		if(aux->next !=  NULL)
+		{
+			erase = ((processNode *)aux->next);
 			aux->next = ((processNode*)aux->next)->next;
+			free(erase);
+			free(erase->process->name);
+			free(erase->process->stackstart);
+			free(erase->process);
+		}
 	}
 
 	for(i = 0; i < 100; i++)
@@ -416,6 +424,7 @@ void kill_in_kernel(int pid)
 	PROCESS * proc;
 	PROCESS * parent;
 	processNode * aux;
+	processNode * erase;
 	int i,j;
 
 	_Cli();
@@ -456,7 +465,14 @@ void kill_in_kernel(int pid)
 		while(aux->next != NULL && ((processNode *)aux->next)->process->pid != pid)
 			aux = ((processNode *)aux->next);
 		if(aux->next !=  NULL)
+		{
+			erase = ((processNode *)aux->next);
 			aux->next = ((processNode*)aux->next)->next;
+			free(erase);
+			free(erase->process->name);
+			free(erase->process->stackstart);
+			free(erase->process);
+		}
 	}
 
 	for(i = 0; i < 100; i++)
@@ -733,6 +749,7 @@ void logUser(void)
 	terminals[1].PID = CreateProcessAt("Shell1", (int(*)(int, char**))shell, 1, 0, (char**)0, 0x400, 2, 1);
 	terminals[2].PID = CreateProcessAt("Shell2", (int(*)(int, char**))shell, 2, 0, (char**)0, 0x400, 2, 1);
 	terminals[3].PID = CreateProcessAt("Shell3", (int(*)(int, char**))shell, 3, 0, (char**)0, 0x400, 2, 1);
+	free(usr);
 	do_close(fd);
 	_Sti();
 	return;
@@ -785,6 +802,7 @@ void createusr(char * name, char * password, char * group)
 	rmDir("usersfile");
 	fd = do_creat("usersfile", 777);
 	write(fd, (void *)usr, sizeof(user) * 100);
+	free(usr);
 	do_close(fd);
 
 	current = aux;

@@ -8,11 +8,9 @@
 *
 ***********************************/
 
-//typedef unsigned int  size_t;
 typedef unsigned int        uint32_t;
 
 void * calloc (int size, int quant);
 void * malloc (int size);
 void init_malloc(void);
-
 

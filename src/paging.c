@@ -9,9 +9,10 @@
 ***********************************/
 
 #include "../include/paging.h"
+#include "../include/defs.h"
 
-typedef unsigned int  size_t;
-typedef unsigned int        uint32_t;
+//typedef unsigned int  size_t;
+//typedef unsigned int        uint32_t;
 typedef uint32_t ptable_entry;
 typedef uint32_t pdir_entry;
 
@@ -84,20 +85,21 @@ inline static uint32_t get_dir_entry_add(int entry)
 
 int create_proc_table( void ) {
 
-    int i;
-    for ( i = 0 ; i < 1024 * 1024; i ++ ) {
+	int i;
+	for ( i = 0; i < 1024 * 1024; i++ ) {
 		if(dirs[i] == 0) {
 			set_proc_ptable( i );
 			dirs[i] = 1;
 			return i;
 		}
 	}
-    return -1;
+	return -1;
 }
 
-uint32_t get_stack_start( uint32_t pdir_offset ) {
-  
-    return USER_VIRTUAL_MEM_START + pdir_offset * PAGE_SIZE * PAGES_PER_TABLE;
+uint32_t get_stack_start(uint32_t pdir_offset){
+
+	printf("USER_VIRTUAL_MEM_START:%d  pdir_offset:%d  PAGE_SIZE:%d PAGES_PER_TABLE:%d\n", USER_VIRTUAL_MEM_START, pdir_offset, PAGE_SIZE, PAGES_PER_TABLE);
+	return USER_VIRTUAL_MEM_START + pdir_offset * PAGE_SIZE * PAGES_PER_TABLE;
 }
 
 static void set_proc_ptable( uint32_t offset ) {

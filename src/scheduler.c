@@ -12,6 +12,8 @@
 #include "../include/kernel.h"
 #include "../include/utils.h"
 #include "../include/stdio.h"
+#include "../include/paging.h"
+#include "../include/malloc.h"
 
 int last100[100]={0};
 int counter100 = 0;
@@ -130,21 +132,23 @@ int LoadESP(PROCESS* proc)
 
 void SetupScheduler(void)
 {
-	void * idleprocess;
-
-	idleprocess = (void *)malloc(0x200);
+	idle.pdir = create_proc_table();
+	printf("idle stack crated. pdir = %d\n", idle.pdir);
+	idle.name = (char*)malloc(8);
 	idle.pid = 0;
 	idle.foreground = 0;
 	idle.priority = 4;
-	idle.name = (char*)malloc(8);
 	memcpy(idle.name, "Idle", str_len("Idle") + 1);
 	idle.state = READY;
 	idle.tty = 0;
-	idle.stackstart = (int)idleprocess;
-	idle.stacksize = 0x200;
+	idle.stacksize = 0x1000;
+	//idle.stackstart = get_stack_start(idle.pdir);
+	idle.stackstart = (uint32_t)malloc(0x1000);
+	idle.ESP = LoadStackFrame(Idle, 0, 0, (uint32_t)((char *)idle.stackstart + idle.stacksize), end_process);
 	idle.parent = -1;
-	idle.waitingPid = -1;
-	idle.ESP = LoadStackFrame(Idle,0,0,(int)(idleprocess + 0x1FF), end_process);
+	idle.waitingPid = 0;
+	idle.sleep = 0;
+	printf("idle process created\n");
 	
 	return;
 }

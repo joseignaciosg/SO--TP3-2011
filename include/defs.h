@@ -92,6 +92,7 @@ typedef enum groups groupID;
 
 typedef unsigned int size_t;
 typedef short int ssize_t;
+typedef unsigned int        uint32_t;
 /* Descriptor de segmento *///GDT
 typedef struct {
 	word limit, base_l;
@@ -140,9 +141,9 @@ typedef struct PROCESS
 	int tty;
 	int foreground;
 	int parent;
-	int ESP;
-	int stackstart;
-	int stacksize;
+	uint32_t ESP;
+	uint32_t stackstart;
+	size_t stacksize;
 	int waitingPid;
 	int sleep;
 	int acum;

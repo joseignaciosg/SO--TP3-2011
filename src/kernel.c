@@ -19,6 +19,7 @@
 #include "../include/pisix.h"
 #include "../include/paging.h"
 #include "../include/malloc.h"
+#include "../include/video.h"
 
 
 DESCR_INT idt[0x90]; /* IDT 144 positions*/
@@ -47,9 +48,13 @@ extern int usrLoged;
 extern int usrName;
 extern int password;
 
+
+
 /*for testing fifos*/
 #define MAX_FIZE_SIZE 1000
 #define MAX_FIFO 100
+
+uint32_t LoadStackFrame(int(*process)(int,char**),int argc,char** argv, uint32_t bottom, void(*cleaner)());
 
 void
 initializeSemaphoreTable(){
@@ -211,13 +216,12 @@ kmain()
 	_Cli();
 	k_clear_screen();
 
+
 	initializeSemaphoreTable();
 	initializeIDT();
 	unmaskPICS();
 	initializePaging();
 	_StartCR3();
-	SetupScheduler();
-
 
 	for(h = 0; h < 200; h++){
 		write_disk(0,h,buffer,BLOCK_SIZE,0);
@@ -239,7 +243,9 @@ kmain()
 	ready = NULL;
 	for(i = 0; i < 4; i++)
 		startTerminal(i);
-	logPID = CreateProcessAt("Login", (int(*)(int, char**))logUser, 0, 0, (char**)0, 0x400, 5, 1);
+	
+	SetupScheduler();
+	logPID = CreateProcessAt("Login", (int(*)(int, char**))logUser, 0, 0, (char**)0, 0x1000, 5, 1);
 	_Sti();
 
 	while(TRUE)
@@ -265,13 +271,10 @@ PROCESS * GetProcessByPID(int pid)
 int CreateProcessAt_in_kernel(createProcessParam * param)
 {
 	PROCESS * proc;
-	int stack;
 	printf("creating process...\n");
 	proc = malloc(sizeof(PROCESS));
 	proc->pdir = create_proc_table();
-	printf("stack crated\n");
-	stack = get_stack_start(proc->pdir);
-	printf("teta\n");
+	printf("stack crated. pdir = %d\n", proc->pdir);
 	proc->name = (char*)malloc(15);
 	proc->pid = nextPID;
 	proc->foreground = param->isFront;
@@ -280,9 +283,9 @@ int CreateProcessAt_in_kernel(createProcessParam * param)
 	proc->state = READY;
 	proc->tty = param->tty;
 	proc->stacksize = param->stacklength;
-	proc->stackstart = (int)stack;
-	printf("peron\n");
-	proc->ESP = LoadStackFrame(param->process,param->argc,param->argv,(int)(stack + param->stacklength - 1), end_process);
+	proc->stackstart = get_stack_start(proc->pdir);
+	printf("stackstart: %d\n", proc->stackstart);
+	proc->ESP = LoadStackFrame(param->process,param->argc,param->argv, (uint32_t)((char *)proc->stackstart + proc->stacksize), end_process);
 	printf("stack frame created\n");
 	proc->parent = CurrentPID;
 	proc->waitingPid = 0;
@@ -295,20 +298,19 @@ int CreateProcessAt_in_kernel(createProcessParam * param)
 }
 
 
-int LoadStackFrame(int(*process)(int,char**),int argc,char** argv, int bottom, void(*cleaner)())
+uint32_t LoadStackFrame(int(*process)(int,char**),int argc,char** argv, uint32_t bottom, void(*cleaner)())
 {
-	printf("chino\n");
+	printf("bottom: %d\n", bottom);
 	STACK_FRAME * frame = (STACK_FRAME*)(bottom - sizeof(STACK_FRAME));
-	printf("chino2\n");
+	printf("stack frame: %d\n", frame);
+	printf("frame->EBP:%d\n", frame->EBP);
 	frame->EBP = 0;
-	printf("chino3\n");
 	frame->EIP = (int)process;
 	frame->CS = 0x08;
 	frame->EFLAGS = 0;
 	frame->retaddr = cleaner;
 	frame->argc = argc;
 	frame->argv = argv;
-	printf("chino4\n");
 	return (int)frame;
 }
 
@@ -565,7 +567,7 @@ void
 up_in_kernel(int key){
 	/*if the process is blocked-> unblock*/
 	PROCESS * proc = GetProcessByPID(semaphoreTable[key].blocked_proc_pid);
-	if (proc->state = BLOCKED){
+	if (proc->state == BLOCKED){
 		awake_process(proc->pid);
 	}
 	semaphoreTable[key].value++;

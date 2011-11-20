@@ -167,4 +167,8 @@ void up_in_kernel(int key);
 
 void down_in_kernel(int key);
 
+PROCESS * GetProcessByPID(int pid);
+
+uint32_t LoadStackFrame(int(*process)(int,char**),int argc,char** argv, uint32_t bottom, void(*cleaner)());
+
 #endif

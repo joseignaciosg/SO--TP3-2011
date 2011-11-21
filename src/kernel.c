@@ -222,6 +222,7 @@ kmain()
 	unmaskPICS();
 	initializePaging();
 	_StartCR3();
+	SetupScheduler();
 
 	for(h = 0; h < 200; h++){
 		write_disk(0,h,buffer,BLOCK_SIZE,0);
@@ -244,8 +245,7 @@ kmain()
 	for(i = 0; i < 4; i++)
 		startTerminal(i);
 	
-	SetupScheduler();
-	logPID = CreateProcessAt("Login", (int(*)(int, char**))logUser, 0, 0, (char**)0, 0x1000, 5, 1);
+	logPID = CreateProcessAt("Login", (int(*)(int, char**))logUser, 0, 0, (char**)0, PAGE_SIZE, 4, 1);
 	_Sti();
 
 	while(TRUE)
@@ -257,7 +257,10 @@ PROCESS * GetProcessByPID(int pid)
 {
 	processNode * aux;
 	if(pid == 0 || ready == NULL)
+	{
+		//printf("no hay procesos\n");
 		return &idle;
+	}
 
 	aux = ((processNode*)ready);
 	while(aux != NULL && aux->process->pid != pid)
@@ -271,12 +274,10 @@ PROCESS * GetProcessByPID(int pid)
 int CreateProcessAt_in_kernel(createProcessParam * param)
 {
 	PROCESS * proc;
-	printf("creating process...\n");
 	proc = malloc(sizeof(PROCESS));
-	proc->pdir = create_proc_table();
-	printf("stack crated. pdir = %d\n", proc->pdir);
 	proc->name = (char*)malloc(15);
-	proc->pid = nextPID;
+	proc->pid = nextPID++;
+	proc->pdir = create_proc_table();
 	proc->foreground = param->isFront;
 	proc->priority = param->priority;
 	memcpy(proc->name, param->name,str_len(param->name) + 1);
@@ -284,15 +285,12 @@ int CreateProcessAt_in_kernel(createProcessParam * param)
 	proc->tty = param->tty;
 	proc->stacksize = param->stacklength;
 	proc->stackstart = get_stack_start(proc->pdir);
-	printf("stackstart: %d\n", proc->stackstart);
 	proc->ESP = LoadStackFrame(param->process,param->argc,param->argv, (uint32_t)((char *)proc->stackstart + proc->stacksize), end_process);
-	printf("stack frame created\n");
 	proc->parent = CurrentPID;
 	proc->waitingPid = 0;
 	proc->sleep = 0;
 	proc->acum = param->priority + 1;
 	set_Process_ready(proc);
-	printf("process ready\n");
 
 	return proc->pid;
 }
@@ -300,10 +298,7 @@ int CreateProcessAt_in_kernel(createProcessParam * param)
 
 uint32_t LoadStackFrame(int(*process)(int,char**),int argc,char** argv, uint32_t bottom, void(*cleaner)())
 {
-	printf("bottom: %d\n", bottom);
 	STACK_FRAME * frame = (STACK_FRAME*)(bottom - sizeof(STACK_FRAME));
-	printf("stack frame: %d\n", frame);
-	printf("frame->EBP:%d\n", frame->EBP);
 	frame->EBP = 0;
 	frame->EIP = (int)process;
 	frame->CS = 0x08;
@@ -368,7 +363,7 @@ void block_process_in_kernel(int pid)
 void awake_process(int pid)
 {
 	PROCESS * proc;
-
+	
 	proc = GetProcessByPID(pid);
 	if(proc->state == BLOCKED && !proc->waitingPid)
 		proc->state = READY;
@@ -742,10 +737,10 @@ void logUser(void)
 		for(j = 0; j < BUFFER_SIZE; j++)
 			buffcopy[j] = 0;
 	}
-	terminals[0].PID = CreateProcessAt("Shell0", (int(*)(int, char**))shell, 0, 0, (char**)0, 0x400, 2, 1);
-	terminals[1].PID = CreateProcessAt("Shell1", (int(*)(int, char**))shell, 1, 0, (char**)0, 0x400, 2, 1);
-	terminals[2].PID = CreateProcessAt("Shell2", (int(*)(int, char**))shell, 2, 0, (char**)0, 0x400, 2, 1);
-	terminals[3].PID = CreateProcessAt("Shell3", (int(*)(int, char**))shell, 3, 0, (char**)0, 0x400, 2, 1);
+	terminals[0].PID = CreateProcessAt("Shell0", (int(*)(int, char**))shell, 0, 0, (char**)0, PAGE_SIZE, 2, 1);
+	terminals[1].PID = CreateProcessAt("Shell1", (int(*)(int, char**))shell, 1, 0, (char**)0, PAGE_SIZE, 2, 1);
+	terminals[2].PID = CreateProcessAt("Shell2", (int(*)(int, char**))shell, 2, 0, (char**)0, PAGE_SIZE, 2, 1);
+	terminals[3].PID = CreateProcessAt("Shell3", (int(*)(int, char**))shell, 3, 0, (char**)0, PAGE_SIZE, 2, 1);
 	do_close(fd);
 	_Sti();
 	return;
@@ -758,7 +753,7 @@ void logout(int argc, char * argv[])
 	usrLoged = 0;
 	for(i = 0; i < 4; i++)
 		kill(terminals[i].PID);
-	logPID = CreateProcessAt("logUsr", (int(*)(int, char**))logUser, currentProcessTTY, 0, (char**)0, 0x400, 4, 1);
+	logPID = CreateProcessAt("logUsr", (int(*)(int, char**))logUser, currentProcessTTY, 0, (char**)0, PAGE_SIZE, 4, 1);
 	_Sti();
 }
 

@@ -42,7 +42,7 @@ int CreateProcessAt(char* name, int (*process)(int,char**), int tty, int argc, c
 	param->priority = priority;
 	param->isFront = isFront;
 	_int_79_caller(CREATE,param);
-	return nextPID++;
+	return nextPID - 1;
 }
 
 void clearTerminalBuffer( int ttyid)

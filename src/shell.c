@@ -22,6 +22,7 @@
 #include "../include/kernel.h"
 #include "../include/kasm.h"
 #include "../include/pisix.h"
+#include "../include/paging.h"
 
 
 /***	Module Defines	***/
@@ -249,21 +250,21 @@ parseBuffer() {
 		showHelp();
 		isFront = 0;
 	}else if(strcmp("prueba", buffcopy)){
-		pid = CreateProcessAt("Prueba", (int(*)(int, char**))prueba, currentProcessTTY, 0, (char**)0, 0x400, 2, isFront);
+		pid = CreateProcessAt("Prueba", (int(*)(int, char**))prueba, currentProcessTTY, 0, (char**)0, PAGE_SIZE, 2, isFront);
 	}else if(strcmp("fifowriter", buffcopy)){
-		pid = CreateProcessAt("fifo_writer", (int(*)(int, char**))fifo_writer_test, currentProcessTTY, 0, (char**)0, 0x400, 2, isFront);
+		pid = CreateProcessAt("fifo_writer", (int(*)(int, char**))fifo_writer_test, currentProcessTTY, 0, (char**)0, PAGE_SIZE, 2, isFront);
 	}else if(strcmp("prueba2", buffcopy)){
-		pid = CreateProcessAt("Prueba2", (int(*)(int, char**))prueba2, currentProcessTTY, 0, (char**)0, 0x400, 2, isFront);
+		pid = CreateProcessAt("Prueba2", (int(*)(int, char**))prueba2, currentProcessTTY, 0, (char**)0, PAGE_SIZE, 2, isFront);
 	}else if(strcmp("prioridad0", buffcopy)){
-		pid = CreateProcessAt("prioridad0", (int(*)(int, char**))prioridad, currentProcessTTY, 0, (char**)0, 0x400, 0, isFront);
+		pid = CreateProcessAt("prioridad0", (int(*)(int, char**))prioridad, currentProcessTTY, 0, (char**)0,PAGE_SIZE, 0, isFront);
 	}else if(strcmp("prioridad1", buffcopy)){
-		pid = CreateProcessAt("prioridad1", (int(*)(int, char**))prioridad, currentProcessTTY, 0, (char**)0, 0x400, 1, isFront);
+		pid = CreateProcessAt("prioridad1", (int(*)(int, char**))prioridad, currentProcessTTY, 0, (char**)0,PAGE_SIZE, 1, isFront);
 	}else if(strcmp("prioridad2", buffcopy)){
-		pid = CreateProcessAt("prioridad2", (int(*)(int, char**))prioridad, currentProcessTTY, 0, (char**)0, 0x400, 2, isFront);
+		pid = CreateProcessAt("prioridad2", (int(*)(int, char**))prioridad, currentProcessTTY, 0, (char**)0,PAGE_SIZE, 2, isFront);
 	}else if(strcmp("prioridad3", buffcopy)){
-		pid = CreateProcessAt("prioridad3", (int(*)(int, char**))prioridad, currentProcessTTY, 0, (char**)0, 0x400, 3, isFront);
+		pid = CreateProcessAt("prioridad3", (int(*)(int, char**))prioridad, currentProcessTTY, 0, (char**)0,PAGE_SIZE, 3, isFront);
 	}else if(strcmp("prioridad4", buffcopy)){
-		pid = CreateProcessAt("prioridad4", (int(*)(int, char**))prioridad, currentProcessTTY, 0, (char**)0, 0x400, 4, isFront);
+		pid = CreateProcessAt("prioridad4", (int(*)(int, char**))prioridad, currentProcessTTY, 0, (char**)0,PAGE_SIZE, 4, isFront);
 	}else if(strcmp("logout", buffcopy)){
 		int aux = currentProcessTTY;
 		clearBuffcopy();
@@ -275,9 +276,9 @@ parseBuffer() {
 			cleared_screen = TRUE;
 		}
 		currentProcessTTY = aux;
-		logoutPID = pid = CreateProcessAt("logout", (int(*)(int, char**))logout, currentProcessTTY, 0, (char**)0, 0x400, 4, isFront);
+		logoutPID = pid = CreateProcessAt("logout", (int(*)(int, char**))logout, currentProcessTTY, 0, (char**)0,PAGE_SIZE, 4, isFront);
 	}else if(strcmp("top", buffcopy)){
-		pid = CreateProcessAt("Top", (int(*)(int, char**))top, currentProcessTTY, 0, (char**)0, 0x400, 2, isFront);
+		pid = CreateProcessAt("Top", (int(*)(int, char**))top, currentProcessTTY, 0, (char**)0, PAGE_SIZE, 2, isFront);
 	}else if(strcmp("kill ", buffcopyparsed[0])){
 		int pid;
 		scanfi(&pid, &buffcopyparsed[1][0]);

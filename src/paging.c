@@ -28,67 +28,25 @@ static uint32_t dirs[1024 * 1024] = {0};
 void initializePaging(void)
 {
 	int i, j;
+	unsigned * table, * dir;
 	for(i = 0; i < PAGE_TABLES; i++) 
 	{
-		void * addr = (void *)(i * PAGES_PER_TABLE * PAGE_SIZE);
-		create_table(addr);
+		dir = (unsigned *)PAGE_DIR + i;
+		* dir = PAGE_DIR + PAGE_SIZE * i + 1;
+		table = (unsigned *)PAGE_DIR + i;
 		for(j = 0; j < PAGES_PER_TABLE; j++)
-			create_page( (void*)((uint32_t)addr + j * PAGE_SIZE) );
+			*(table + j) = PAGE_USER_START + j * PAGE_SIZE;
 	}
 
 	return;
 }
 
-
-static void create_table(void * addr)
-{
-  
-	uint32_t pdir_offset = ((uint32_t) addr) >> 22;
-	pdir_entry * dir = (pdir_entry *)P_DIR_START + pdir_offset;
-	* dir = get_dir_entry(P_DIR_START + PAGE_SIZE + pdir_offset * PAGE_SIZE, RWUPRESENT );
-
-	return;
-}
-
-
-static void create_page(void * addr)
-{ 
-	uint32_t pdir_offset = ((uint32_t) addr) >> 22;
-	pdir_entry *dir = (pdir_entry *)P_DIR_START + pdir_offset;
-	ptable_entry *tab = (ptable_entry * )get_dir_entry_add( *dir );
-	ptable_entry *entry = tab + ((((uint32_t) addr)>> 12) & 0x3FF);
-	* entry = get_table_entry( (uint32_t ) addr, RWUPRESENT );
-
-	return;
-}
-
-
-static ptable_entry get_dir_entry(int address, int perms)
-{
-	ptable_entry ret = address & 0xFFFFF000;
-	ret |= perms;
-	return ret;
-}
-
-
-static ptable_entry get_table_entry(int address, int perms)
-{  
-	ptable_entry ret = address & 0xFFFFF000;
-	ret |= perms;
-	return ret;
-}
-
-inline static uint32_t get_dir_entry_add(int entry)
-{
-	return entry & 0xFFFFF000;
-}
-
 int create_proc_table( void ) {
 
 	int i;
-	for ( i = 0; i < 1024 * 1024; i++ ) {
+	for (i = 0; i < 1024 * 1024; i++){
 		if(dirs[i] == 0) {
-			set_proc_ptable( i );
+			set_proc_ptable(i);
 			dirs[i] = 1;
 			return i;
 		}
@@ -96,28 +54,17 @@ int create_proc_table( void ) {
 	return -1;
 }
 
-uint32_t get_stack_start(uint32_t pdir_offset){
+uint32_t get_stack_start(uint32_t offset){
 
-	printf("USER_VIRTUAL_MEM_START:%d  pdir_offset:%d  PAGE_SIZE:%d PAGES_PER_TABLE:%d\n", USER_VIRTUAL_MEM_START, pdir_offset, PAGE_SIZE, PAGES_PER_TABLE);
-	return USER_VIRTUAL_MEM_START + pdir_offset * PAGE_SIZE * PAGES_PER_TABLE;
+	return PAGE_USER_START + offset * PAGE_SIZE;
 }
 
-static void set_proc_ptable( uint32_t offset ) {
+static void set_proc_ptable(uint32_t offset) {
 
-	pdir_entry *dir = (pdir_entry *)P_DIR_START;
+	int i;
+	unsigned * table = (unsigned *) (PAGE_USER_START + offset * PAGE_SIZE);
 	
-	//Get the virtual address for the process
-	uint32_t mem = USER_VIRTUAL_MEM_START + PAGE_SIZE * 1024 * offset;
-	dir += (mem >> 22);
-	//Adress of the start of the process' page table
-	ptable_entry * table = (ptable_entry  *) (P_TABLE_USER_START + offset * PAGE_SIZE);
-	
-	//Fill the directory entry for the process' page table
-	*dir = get_dir_entry( (uint32_t) table, RWUPRESENT);
-	int i = 0;
-
-	//Sets all page table entries as not present, not initialized
-	for( i = 0 ; i < PAGES_PER_TABLE ; i ++ ) {
+	for(i = 0; i < PAGE_SIZE; i++) {
 		table[i] = 0;
 	}
 }

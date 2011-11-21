@@ -133,22 +133,18 @@ int LoadESP(PROCESS* proc)
 void SetupScheduler(void)
 {
 	idle.pdir = create_proc_table();
-	printf("idle stack crated. pdir = %d\n", idle.pdir);
 	idle.name = (char*)malloc(8);
 	idle.pid = 0;
 	idle.foreground = 0;
-	idle.priority = 4;
+	idle.priority = 0;
 	memcpy(idle.name, "Idle", str_len("Idle") + 1);
 	idle.state = READY;
 	idle.tty = 0;
-	idle.stacksize = 0x1000;
-	//idle.stackstart = get_stack_start(idle.pdir);
-	idle.stackstart = (uint32_t)malloc(0x1000);
+	idle.stacksize = PAGE_SIZE;
+	idle.stackstart = get_stack_start(idle.pdir);
 	idle.ESP = LoadStackFrame(Idle, 0, 0, (uint32_t)((char *)idle.stackstart + idle.stacksize), end_process);
 	idle.parent = -1;
-	idle.waitingPid = 0;
-	idle.sleep = 0;
-	printf("idle process created\n");
+	idle.waitingPid = -1;
 	
 	return;
 }

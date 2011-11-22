@@ -56,6 +56,21 @@ void prueba(int argc, char * argv[])
 	while(TRUE)
 		;
 	printf("prueba\n");*/
+
+	/* SLEEP DE CRIS
+	int x = 0;
+	void f(int a) {
+	   while(a < 10000000) {
+	       x = 0;
+	       while(x > 0) {
+	           x++;
+	       }
+	       a++;
+	   }
+	   f(0);
+	}
+	*/
+
 	prueba(argc,argv);
 	return;
 }

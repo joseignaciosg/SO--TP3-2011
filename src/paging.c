@@ -62,10 +62,10 @@ uint32_t get_stack_start(uint32_t offset) {
 static void set_proc_ptable(uint32_t offset) {
 
 	int i;
-	unsigned * table = (unsigned *) (PAGE_USER_START + offset * PAGE_SIZE);
+	unsigned * page = (unsigned *) (PAGE_USER_START + offset * PAGE_SIZE);
 
 	for (i = 0; i < PAGE_SIZE; i++) {
-		table[i] = 0;
+		page[i] = 0;
 	}
 }
 

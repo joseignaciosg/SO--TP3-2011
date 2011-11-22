@@ -38,7 +38,8 @@ EXTERN isTimeSlot
 EXTERN GetTemporaryESP
 
 EXTERN LoadAuxStack
-EXTERN ChangePages
+EXTERN HopOffPages
+EXTERN TakeUpPages
 
 SECTION .text
 
@@ -169,9 +170,13 @@ _int_08_hand:				; Handler de INT 8 ( Timer tick)
 		mov esp, eax
 		mov eax, 0
 
-		call ChangePages                    ;Se bajan todas la p‡ginas del proceso que se estaba ejecutando.
+		call HopOffPages                    ;Se bajan todas la p‡ginas del proceso que se estaba ejecutando.
 											;Se suben todas las p‡ginas del proceso que se va a ejecutar.
 		call GetNextProcess                 ;Se cambia el stack al proceso nuevo.
+
+		push eax
+		call TakeUpPages
+
 		push eax
 		call LoadESP
 		pop ebx

@@ -17,7 +17,7 @@ typedef uint32_t ptable_entry;
 typedef uint32_t pdir_entry;
 
 extern int nextPID;
-extern int currPID;
+extern int CurrentPID;
 
 
 static void create_table(void * addr);
@@ -37,7 +37,7 @@ void initializePaging(void) {
 		*dir = PAGE_DIR + PAGE_SIZE * i + 1;
 		/*assigns directories entries*/
 		//table = (unsigned *) PAGE_DIR + i;
-		table = PAGE_DIR + PAGE_SIZE * i + 1;
+		table = (unsigned *)PAGE_DIR + PAGE_SIZE * i + 1;
 		for (j = 0; j < PAGES_PER_TABLE; j++)
 			/*assigns tables entries*/
 			*(table + j) = PAGE_USER_START + j * PAGE_SIZE;
@@ -97,7 +97,7 @@ int LoadAuxStack()
 
 }
 
-void ChangePages() {
+void HopOffPages() {
 	/*
 	 * Se cambia al stack auxiliar (con LoadAuxStack)
 	 * Se bajan todas la p‡ginas del proceso que se estaba ejecutando.
@@ -110,13 +110,17 @@ void ChangePages() {
 	actual->esp = (unsigned int) newStack - offset;
 	actual->stack = newStack;*/
 
-	/*PROCESS p = GetProcessByPID(currPID);
-	int currpage = get_stack_start(p->pdir);
-	addr = addr |= 7;*/
+	PROCESS * p = (PROCESS *)GetProcessByPID(CurrentPID);
+	//int currpage = get_stack_start(p->pdir);
 
+	/*int table_num = p->pdir/1024;
+	int table_offset = p->pdir%1024;
+	int table_frame = PAGE_DIR + PAGE_SIZE + PAGE_SIZE*table_num +table_offset;
+	table_frame |= 7;*/
 
+}
 
-
-
+PROCESS* TakeUpPages(PROCESS* proc){
+	return proc;
 }
 

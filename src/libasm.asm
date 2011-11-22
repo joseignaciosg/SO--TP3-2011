@@ -152,7 +152,7 @@ _getCPUSpeed:
 		ret
 
 _yield:
-	int 8
+    int 8
 	ret
 
 _int_08_hand:				; Handler de INT 8 ( Timer tick)

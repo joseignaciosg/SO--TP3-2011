@@ -18,6 +18,7 @@ typedef uint32_t pdir_entry;
 
 extern int nextPID;
 extern int CurrentPID;
+extern DESCR_INT idt[0x90];
 
 
 static void create_table(void * addr);
@@ -26,6 +27,7 @@ static ptable_entry get_dir_entry(int address, int perms);
 static ptable_entry get_table_entry(int address, int perms);
 inline static uint32_t get_dir_entry_add(int entry);
 static void set_proc_ptable(uint32_t offset);
+void page_fault_handler_wrapper( int err_code);
 
 static uint32_t dirs[1024 * 1024] = {0};
 
@@ -43,6 +45,9 @@ void initializePaging(void) {
 			/*assigns tables entries*/
 			*(table + j) = PAGE_USER_START + j * PAGE_SIZE;
 	}
+
+
+	setup_IDT_entry(&idt[0x0E], 0x08, (dword) &page_fault_handler_wrapper, ACS_INT, 0);/*for block_process and kill*/
 
 	return;
 }
@@ -133,5 +138,14 @@ PROCESS* TakeUpPages(PROCESS* p){
 	table_frame |= 7;
 
 	return p;
+}
+
+void page_fault_handler_wrapper( int err_code){
+	printf("paging fault\n");
+
+    /*uint32_t address = 0;
+    __asm__ volatile("MOVL 	%%CR2, %0" : "=r" (address) : );
+    page_fault_handler( err_code, address);*/
+
 }
 

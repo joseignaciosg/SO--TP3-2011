@@ -51,10 +51,12 @@ void prueba2(int argc, char * argv[])
 
 void prueba(int argc, char * argv[])
 {
-	_Sti();
+	/*_Sti();
 	printf("prueba\n");
 	while(TRUE)
 		;
+	printf("prueba\n");*/
+	prueba(argc,argv);
 	return;
 }
 

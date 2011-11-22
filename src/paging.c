@@ -51,7 +51,7 @@ int create_proc_table(void) {
 		if (dirs[i] == 0) {
 			set_proc_ptable(i);
 			//dirs[i] = 1;
-			dirs[i] = nextPID-1;
+			dirs[i] = nextPID+1;
 			return i;
 		}
 	}

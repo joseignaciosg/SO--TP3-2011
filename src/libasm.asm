@@ -165,20 +165,20 @@ _int_08_hand:				; Handler de INT 8 ( Timer tick)
 		push eax
 		call SaveESP
 		pop eax
- 											;new stuff
-        call LoadAuxStack                   ;Se cambia al stack auxiliar
+ 									;new stuff
+        call LoadAuxStack           ;Se cambia al stack auxiliar
 		mov esp, eax
 		mov eax, 0
 
-		call HopOffPages                    ;Se bajan todas la p‡ginas del proceso que se estaba ejecutando.
-											;Se suben todas las p‡ginas del proceso que se va a ejecutar.
-		call GetNextProcess                 ;Se cambia el stack al proceso nuevo.
+		call HopOffPages            ;Se bajan todas la p‡ginas del proceso que se estaba ejecutando.
+
+		call GetNextProcess
 
 		push eax
-		call TakeUpPages
+		call TakeUpPages		     ;Se suben todas las p‡ginas del proceso que se va a ejecutar.
 
 		push eax
-		call LoadESP
+		call LoadESP    		     ;Se cambia el stack al proceso nuevo.
 		pop ebx
 		mov esp,eax
 

@@ -113,14 +113,22 @@ void HopOffPages() {
 	PROCESS * p = (PROCESS *)GetProcessByPID(CurrentPID);
 	//int currpage = get_stack_start(p->pdir);
 
-	/*int table_num = p->pdir/1024;
+	int table_num = p->pdir/1024;
 	int table_offset = p->pdir%1024;
 	int table_frame = PAGE_DIR + PAGE_SIZE + PAGE_SIZE*table_num +table_offset;
-	table_frame |= 7;*/
+	table_frame |= 7;
 
 }
 
-PROCESS* TakeUpPages(PROCESS* proc){
-	return proc;
+PROCESS* TakeUpPages(PROCESS* p){
+	/**
+	 * Se suben todas las p‡ginas del proceso que se va a ejecutar.
+	 */
+	int table_num = p->pdir/1024;
+	int table_offset = p->pdir%1024;
+	int table_frame = PAGE_DIR + PAGE_SIZE + PAGE_SIZE*table_num +table_offset;
+	table_frame |= 7;
+
+	return p;
 }
 

@@ -77,6 +77,11 @@ static void set_proc_ptable(uint32_t offset) {
 
 int LoadAuxStack()
 {
+	/*
+	 * Se cambia al stack auxiliar (con LoadAuxStack)
+	 *
+	 */
+
 	/*STACK_FRAME * frame = (STACK_FRAME*) (bottom - sizeof(STACK_FRAME));
 	frame->EBP = 0;
 	frame->EIP = (int) process;
@@ -99,10 +104,7 @@ int LoadAuxStack()
 
 void HopOffPages() {
 	/*
-	 * Se cambia al stack auxiliar (con LoadAuxStack)
 	 * Se bajan todas la p‡ginas del proceso que se estaba ejecutando.
-	 * Se suben todas las p‡ginas del proceso que se va a ejecutar.
-	 * Se cambia el stack al proceso nuevo (con GetNextProcess)
 	 */
 
 	/*char * newStack = (char*) krealloc(actual->pid);
@@ -116,7 +118,7 @@ void HopOffPages() {
 	int table_num = p->pdir/1024;
 	int table_offset = p->pdir%1024;
 	int table_frame = PAGE_DIR + PAGE_SIZE + PAGE_SIZE*table_num +table_offset;
-	table_frame |= 7;
+	table_frame = table_frame & 0xFFF0;
 
 }
 

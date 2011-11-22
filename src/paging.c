@@ -16,6 +16,9 @@
 typedef uint32_t ptable_entry;
 typedef uint32_t pdir_entry;
 
+extern int nextPID;
+
+
 static void create_table(void * addr);
 static void create_page(void * addr);
 static ptable_entry get_dir_entry(int address, int perms);
@@ -47,7 +50,8 @@ int create_proc_table(void) {
 	for (i = 0; i < 1024 * 1024; i++) {
 		if (dirs[i] == 0) {
 			set_proc_ptable(i);
-			dirs[i] = 1;
+			//dirs[i] = 1;
+			dirs[i] = nextPID-1;
 			return i;
 		}
 	}
@@ -103,6 +107,7 @@ void ChangePages() {
 	unsigned int offset = (unsigned int) actual->stack - actual->esp;
 	actual->esp = (unsigned int) newStack - offset;
 	actual->stack = newStack;*/
+
 
 
 

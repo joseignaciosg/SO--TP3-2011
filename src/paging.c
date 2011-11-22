@@ -38,7 +38,8 @@ void initializePaging(void) {
 		/*assigns directories entries*/
 		//table = (unsigned *) PAGE_DIR + i;
 		table = (unsigned *)PAGE_DIR + PAGE_SIZE * (i + 1);
-		for (j = 0; j < PAGES_PER_TABLE; j++)
+
+		for (j = 1; j < PAGES_PER_TABLE; j++)
 			/*assigns tables entries*/
 			*(table + j) = PAGE_USER_START + j * PAGE_SIZE;
 	}

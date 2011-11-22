@@ -17,6 +17,7 @@ typedef uint32_t ptable_entry;
 typedef uint32_t pdir_entry;
 
 extern int nextPID;
+extern int currPID;
 
 
 static void create_table(void * addr);
@@ -35,7 +36,8 @@ void initializePaging(void) {
 		dir = (unsigned *) PAGE_DIR + i;
 		*dir = PAGE_DIR + PAGE_SIZE * i + 1;
 		/*assigns directories entries*/
-		table = (unsigned *) PAGE_DIR + i;
+		//table = (unsigned *) PAGE_DIR + i;
+		table = PAGE_DIR + PAGE_SIZE * i + 1;
 		for (j = 0; j < PAGES_PER_TABLE; j++)
 			/*assigns tables entries*/
 			*(table + j) = PAGE_USER_START + j * PAGE_SIZE;
@@ -108,6 +110,9 @@ void ChangePages() {
 	actual->esp = (unsigned int) newStack - offset;
 	actual->stack = newStack;*/
 
+	/*PROCESS p = GetProcessByPID(currPID);
+	int currpage = get_stack_start(p->pdir);
+	addr = addr |= 7;*/
 
 
 

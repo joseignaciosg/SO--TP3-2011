@@ -71,7 +71,9 @@ void prueba(int argc, char * argv[])
 	}
 	*/
 
-	prueba(argc,argv);
+	//prueba(argc,argv);
+    __asm__ volatile("MOVL $0x0800D51C,100 ");
+
 	return;
 }
 

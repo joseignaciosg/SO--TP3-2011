@@ -190,9 +190,12 @@ static void create_kernel_page( void* addr) {
  **/
 static void create_kernel_ptable(  void* addr ) {
   
-      uint32_t pdir_offset = ((uint32_t) addr) >> 22;
-      pdir_entry *dir = (pdir_entry *)P_DIR_START + pdir_offset;
-      *dir = get_dir_entry(P_TABLE_START + pdir_offset * PAGE_SIZE, RWUPRESENT );
+      uint32_t pdir_offset = ((uint32_t) addr) >> 22;/*va desde 0 a 63*/
+      pdir_entry *dir = (pdir_entry *)P_DIR_START + pdir_offset; /*son las posiciones de las entradas del directorio de paginas*/
+      *dir = get_dir_entry(P_TABLE_START + pdir_offset * PAGE_SIZE, RWUPRESENT );/*asigna donde est‡ el comienzo cada tablas de paginas
+      	  	  	  	  	  	  	  	  	  	  	  	  	  	  	  	  	  	  	  correspondiente a cada entrada*/
+      /*se queda con los 20 bits m‡s significativos del page frame address y pone las tablas de p‡ginas como presentes*/
+
 }
 
 /**
@@ -202,7 +205,7 @@ static void create_kernel_ptable(  void* addr ) {
 void initializePaging( void ){
 	int i,j;
     for ( i = 0 ; i < TOTAL_KERNEL_PAGE_TABLES ; i ++ ) {
-		void *addr = (void *)(i * PTABLE_ENTRIES * PAGE_SIZE);/*salta de 4Mb en 4Mb, deja lugar para todas las paginas de una tabla*/
+		void *addr = (void *)(i * PTABLE_ENTRIES * PAGE_SIZE);/*salta de 4Mb en 4Mb, deja lugar para todas las paginas de una tabla */
 		create_kernel_ptable(addr);
 		for(j = 0; j < PTABLE_ENTRIES ; j ++) {
 			create_kernel_page((void*)((uint32_t)addr + j * PAGE_SIZE));

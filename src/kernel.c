@@ -288,6 +288,8 @@ int CreateProcessAt_in_kernel(createProcessParam * param) {
 					param->argv,
 					(uint32_t) ((char *) proc->stackstart + proc->stacksize), end_process)
 					;
+	printf("ESP: %d \n",proc->ESP);
+
 	proc->parent = CurrentPID;
 	proc->waitingPid = 0;
 	proc->sleep = 0;

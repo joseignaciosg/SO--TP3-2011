@@ -163,6 +163,7 @@ static void set_proc_ptable( uint32_t offset ) {
 
 uint32_t get_stack_start( uint32_t pdir_offset ) {
 
+	printf("stack start %d\n",USER_VIRTUAL_MEM_START + pdir_offset * PAGE_SIZE * PTABLE_ENTRIES);
     return USER_VIRTUAL_MEM_START + pdir_offset * PAGE_SIZE * PTABLE_ENTRIES;
     /*le estoy pasando el comienzo de la primera pagina de la tabla asignada al proceso*/
 }

@@ -126,14 +126,22 @@ void clear_proc_ptable( uint32_t offset) {
 }
 
 static void set_proc_ptable( uint32_t offset ) {
+	/*se est‡ inicializando una una tabla de p‡ginas (con todas
+	 * sus paginas) para el usuario*/
 
 	pdir_entry *dir = (pdir_entry *)P_DIR_START;
 	
 	//Get the virtual address for the process
 	uint32_t mem = USER_VIRTUAL_MEM_START + PAGE_SIZE * 1024 * offset;
-	dir += (mem >> 22);
+
+	dir += (mem >> 22); /*entrada del directorio de paginas que apunta a la tabla*/
 	//Adress of the start of the process' page table
+
 	ptable_entry * table = (ptable_entry  *) (P_TABLE_USER_START + offset * PAGE_SIZE);
+	/*P_TABLE_USER_START es donde empiezan las tablaes del usuario, es decir, partiendo de la direccion
+	 * inicial , sumo 4096 para el direcotrio de paginas y luedo sumo 64 * 4096 , ya que hay 64 tablas de
+	 * paginas asignadas para el kernel*/
+
 	
 	//Fill the directory entry for the process' page table
 	*dir = get_dir_entry( (uint32_t) table, RWUPRESENT);
@@ -146,7 +154,7 @@ static void set_proc_ptable( uint32_t offset ) {
 }
 
 uint32_t get_stack_start( uint32_t pdir_offset ) {
-  
+
     return USER_VIRTUAL_MEM_START + pdir_offset * PAGE_SIZE * PTABLE_ENTRIES;
 }
 

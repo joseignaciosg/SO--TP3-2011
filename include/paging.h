@@ -16,7 +16,7 @@
 #define PAGE_DIR	0x08000000
 #define PAGE_USER_START	(PAGE_DIR + PAGE_SIZE + PAGE_TABLES * PAGE_SIZE)
 
-void initializePaging(void);
+//void initializePaging(void);
 
 int create_proc_table(void);
 

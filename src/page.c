@@ -202,7 +202,7 @@ static void create_kernel_ptable(  void* addr ) {
 void initializePaging( void ){
 	int i,j;
     for ( i = 0 ; i < TOTAL_KERNEL_PAGE_TABLES ; i ++ ) {
-		void *addr = (void *)(i * PTABLE_ENTRIES * PAGE_SIZE);
+		void *addr = (void *)(i * PTABLE_ENTRIES * PAGE_SIZE);/*salta de 4Mb en 4Mb, deja lugar para todas las paginas de una tabla*/
 		create_kernel_ptable(addr);
 		for(j = 0; j < PTABLE_ENTRIES ; j ++) {
 			create_kernel_page((void*)((uint32_t)addr + j * PAGE_SIZE));

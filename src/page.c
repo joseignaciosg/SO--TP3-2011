@@ -174,11 +174,13 @@ int create_proc_table( void ) {
  **/
 static void create_kernel_page( void* addr) {
   
-      uint32_t pdir_offset = ((uint32_t) addr) >> 22;
-      pdir_entry *dir = (pdir_entry *)P_DIR_START + pdir_offset;
-      ptable_entry *tab = (ptable_entry * )get_dir_entry_add( *dir );
-      ptable_entry *entry = tab + ((((uint32_t) addr)>> 12) & 0x3FF);
-      *entry = get_table_entry( (uint32_t ) addr, RWUPRESENT );
+      uint32_t pdir_offset = ((uint32_t) addr) >> 22;/*va desde 0 a 63, para ver donde comienza la tabla en cuestion*/
+      pdir_entry *dir = (pdir_entry *)P_DIR_START + pdir_offset; /*busca la tabla con el offset anterior*/
+      ptable_entry *tab = (ptable_entry * )get_dir_entry_add( *dir ); /*se queda con los 20 bits mas significativos*/
+      ptable_entry *entry = tab + ((((uint32_t) addr)>> 12) & 0x3FF); /*se queda con los 10 bits menos significativos
+       	   	   	   	   	   	   	   	   	   	   	   	   	   	   	   	   de addr*/
+      *entry = get_table_entry( (uint32_t ) addr, RWUPRESENT ); /*setea el page frame address de la pagina, poniendola
+      	  	  	  	  	  	  	  	  	  	  	  	  	  	  	  como presente*/
 }
 
 /**
@@ -209,6 +211,8 @@ void initializePaging( void ){
 		create_kernel_ptable(addr);
 		for(j = 0; j < PTABLE_ENTRIES ; j ++) {
 			create_kernel_page((void*)((uint32_t)addr + j * PAGE_SIZE));
+			/*para cada una de las tablas de p‡ginas va saltando de 4Kb en 4Kb
+			 * inicializando las p‡ginas*/
 		}
     }
     printf("leaving initializePaging\n");

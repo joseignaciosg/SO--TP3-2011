@@ -169,7 +169,7 @@ static void set_proc_ptable( uint32_t offset ) {
 
 uint32_t get_stack_start( uint32_t pdir_offset ) {
 
-	//printf("USER_VIRTUAL_MEM_START:%d pdir_offset:%d PAGE_SIZE:%d PTABLE_ENTRIES:%d\n", USER_VIRTUAL_MEM_START, pdir_offset, PAGE_SIZE, PTABLE_ENTRIES);
+	printf("USER_VIRTUAL_MEM_START:%d pdir_offset:%d PAGE_SIZE:%d PTABLE_ENTRIES:%d\n", USER_VIRTUAL_MEM_START, pdir_offset, PAGE_SIZE, PTABLE_ENTRIES);
 	return USER_VIRTUAL_MEM_START + pdir_offset * PAGE_SIZE * PTABLE_ENTRIES;
 }
 

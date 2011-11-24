@@ -257,10 +257,7 @@ PROCESS * GetProcessByPID(int pid)
 {
 	processNode * aux;
 	if(pid == 0 || ready == NULL)
-	{
-		//printf("no hay procesos\n");
 		return &idle;
-	}
 
 	aux = ((processNode*)ready);
 	while(aux != NULL && aux->process->pid != pid)
@@ -277,20 +274,23 @@ int CreateProcessAt_in_kernel(createProcessParam * param)
 	proc = malloc(sizeof(PROCESS));
 	proc->name = (char*)malloc(15);
 	proc->pid = nextPID++;
-	proc->pdir = create_proc_table();
+	proc->pdir = create_proc_ptable();
 	proc->foreground = param->isFront;
 	proc->priority = param->priority;
 	memcpy(proc->name, param->name,str_len(param->name) + 1);
 	proc->state = READY;
 	proc->tty = param->tty;
-	proc->stacksize = param->stacklength;
+	proc->stacksize =  1024;
 	proc->stackstart = get_stack_start(proc->pdir);
-	proc->ESP = LoadStackFrame(param->process,param->argc,param->argv, (uint32_t)((char *)proc->stackstart + proc->stacksize), end_process);
+	//proc->stackstart = (uint32_t)malloc(1024 * 4096);
+	printf("proc->stackstart : %d\n", proc->stackstart);
+	proc->ESP = LoadStackFrame(param->process, param->argc, param->argv, (uint32_t)((char *)proc->stackstart + proc->stacksize), end_process);
 	proc->parent = CurrentPID;
 	proc->waitingPid = 0;
 	proc->sleep = 0;
 	proc->acum = param->priority + 1;
 	set_Process_ready(proc);
+	printf("process created\n");
 
 	return proc->pid;
 }

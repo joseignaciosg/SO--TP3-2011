@@ -147,7 +147,7 @@ typedef struct PROCESS
 	int waitingPid;
 	int sleep;
 	int acum;
-	int pdir;
+	uint32_t pdir;
 
 } PROCESS;
 

@@ -148,10 +148,11 @@ static void set_proc_ptable( uint32_t offset ) {
 	/* se pone la tabla que se est‡ creando como presente en la entrada correspondiente del directorio
 	 * de paginas*/
 
-	int i = 0;
+	int i;
 
+	/*REVISAR ESTO!*/
 	//Sets all page table entries as not present, not initialized
-	for( i = 0 ; i < PTABLE_ENTRIES ; i ++ ) {
+	for( i =0; i < PTABLE_ENTRIES ; i ++ ) {
 		table[i] = 0;
 	}
 

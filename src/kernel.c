@@ -205,9 +205,17 @@ int kmain() {
 	initializeSemaphoreTable();
 	initializeIDT();
 	unmaskPICS();
+	printf("before initializePaging\n");
 	initializePaging();
+	printf("after initializePaging\n");
+
 	_StartCR3();
+	printf("after _StartCR3\n");
+    __asm__ volatile("MOVL $0x080FD51C,100 ");
+	printf("after access\n");
+
 	SetupScheduler();
+	printf("after SetupScheduler\n");
 
 
 
@@ -236,8 +244,10 @@ int kmain() {
 			(char**) 0, PAGE_SIZE, 4, 1);
 	_Sti();
 
-	while (TRUE)
+	printf("after CreateProcessAt of login\n");
+	while (TRUE){
 		;
+	}
 	return 1;
 }
 

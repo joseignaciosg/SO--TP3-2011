@@ -37,6 +37,10 @@ EXTERN GetNextProcess
 EXTERN isTimeSlot
 EXTERN GetTemporaryESP
 
+EXTERN LoadAuxStack
+EXTERN HopOffPages
+EXTERN TakeUpPages
+
 SECTION .text
 
 
@@ -151,9 +155,25 @@ _yield:
 	int 8
 	ret
 
+;_int_08_hand:				; Handler de INT 8 ( Timer tick)
+;	cli
+;	pushad
+;		call isTimeSlot
+;		cmp eax,0
+;		jne processRunning
+;		mov eax, esp
+;		push eax
+;		call SaveESP
+;		pop eax
+;		call GetNextProcess
+;		push eax
+;		call LoadESP
+;		pop ebx
+;		mov esp,eax
+
 _int_08_hand:				; Handler de INT 8 ( Timer tick)
-	cli
-	pushad
+		cli
+		pushad
 		call isTimeSlot
 		cmp eax,0
 		jne processRunning
@@ -161,12 +181,23 @@ _int_08_hand:				; Handler de INT 8 ( Timer tick)
 		push eax
 		call SaveESP
 		pop eax
+ 									;new stuff
+        call LoadAuxStack           ;Se cambia al stack auxiliar
+		mov esp, eax
+		mov eax, 0
+
+		call HopOffPages            ;Se bajan todas la p‡ginas del proceso que se estaba ejecutando.
+
 		call GetNextProcess
+
 		push eax
-		call LoadESP
+		call TakeUpPages		     ;Se suben todas las p‡ginas del proceso que se va a ejecutar.
+
+		push eax
+		call LoadESP    		     ;Se cambia el stack al proceso nuevo.
 		pop ebx
 		mov esp,eax
-	
+
 processRunning:	mov al,20h			; Envio de EOI generico al PIC
 		out 20h,al
 	popad

@@ -32,7 +32,7 @@ struct int_params {
 static void create_kernel_ptable(void * addr);
 static void create_kernel_page(void * addr);
 static ptable_entry get_dir_entry(uint32_t address, uint32_t perms);
-static ptable_entry get_table_entry(uint32_t address, uint32_t perms);
+static ptable_entry get_table_entry(uint32_t address, uint32_t perms, int flag);
 inline static uint32_t get_dir_entry_add(pdir_entry entry);
 static void set_proc_ptable(uint32_t offset);
 void page_fault_handler(uint32_t errcode, uint32_t address);
@@ -52,10 +52,15 @@ static pdir_entry get_dir_entry(uint32_t address, uint32_t perms) {
 	return ret;
 }
 
-static ptable_entry get_table_entry(uint32_t address, uint32_t perms) {
+static ptable_entry get_table_entry(uint32_t address, uint32_t perms, int flag) {
 
 	pdir_entry ret = address & 0xFFFFF000;
 	ret |= perms;
+	/*proof*/
+	if (flag){
+		ret |= 512; //octavo bit en 1
+		printf("\ntable entry %d\n",(ret>>9)&0x1);/*print bit 8*/
+	}
 	return ret;
 }
 
@@ -104,16 +109,15 @@ void clear_proc_ptable(uint32_t offset) {
 	dirs[offset] = 0;
 }
 
-static void create_user_page(void* addr, int perms) {
+static void create_user_page(void* addr, int perms,int flag) {
 
 	uint32_t pdir_offset = ((uint32_t) addr) >> 22;/*va desde 0 a 63, para ver donde comienza la tabla en cuestion*/
 	pdir_entry *dir = (pdir_entry *) P_DIR_START + pdir_offset; /*busca la tabla con el offset anterior*/
 	ptable_entry *tab = (ptable_entry *) get_dir_entry_add(*dir); /*se queda con los 20 bits mas significativos*/
 	ptable_entry *entry = tab + ((((uint32_t) addr) >> 12) & 0x3FF); /*se queda con los 10 bits menos significativos
 	 de addr*/
-	*entry = get_table_entry((uint32_t) addr, perms); /*setea el page frame address de la pagina, poniendola
+	*entry = get_table_entry((uint32_t) addr, perms,flag); /*setea el page frame address de la pagina, poniendola
 	 como presente*/
-	//RWUPRESENT
 }
 
 static void set_proc_ptable(uint32_t offset) {
@@ -142,9 +146,10 @@ static void set_proc_ptable(uint32_t offset) {
 	int j;
 
 	void *addr = (void *) ( ( offset +64 ) * PTABLE_ENTRIES * PAGE_SIZE);
-	create_user_page((void*) ((uint32_t) addr + 0 ),RWUPRESENT);
+	create_user_page((void*) ((uint32_t) addr + 0 ),RWUPRESENT,1);
+
 	for (j = 1; j < PTABLE_ENTRIES; j++) {
-		create_user_page((void*) ((uint32_t) addr + j * PAGE_SIZE),RWUNPRESENT);
+		create_user_page((void*) ((uint32_t) addr + j * PAGE_SIZE),RWUNPRESENT,0);
 	}
 
 	/*REVISAR ESTO!*/
@@ -191,7 +196,7 @@ static void create_kernel_page(void* addr) {
 	ptable_entry *tab = (ptable_entry *) get_dir_entry_add(*dir); /*se queda con los 20 bits mas significativos*/
 	ptable_entry *entry = tab + ((((uint32_t) addr) >> 12) & 0x3FF); /*se queda con los 10 bits menos significativos
 	 de addr*/
-	*entry = get_table_entry((uint32_t) addr, RWUPRESENT); /*setea el page frame address de la pagina, poniendola
+	*entry = get_table_entry((uint32_t) addr, RWUPRESENT,0); /*setea el page frame address de la pagina, poniendola
 	 como presente*/
 }
 
@@ -238,4 +243,65 @@ void initializePaging(void) {
 
 	return;
 }
+
+int LoadAuxStack()
+{
+	/*
+	 * Se cambia al stack auxiliar (con LoadAuxStack)
+	 *
+	 */
+
+	/*STACK_FRAME * frame = (STACK_FRAME*) (bottom - sizeof(STACK_FRAME));
+	frame->EBP = 0;
+	frame->EIP = (int) process;
+	frame->CS = 0x08;
+	frame->EFLAGS = 0;
+	frame->retaddr = cleaner;
+	frame->argc = argc;
+	frame->argv = argv;
+	return (int) frame;
+	return LoadStackFrame(
+			(int(*)(int, char**)) shell,
+			param->argc,
+			param->argv,
+			(uint32_t) ((char *) proc->stackstart + proc->stacksize), end_process);
+			*/
+
+	return 0x06000000;/* 96Mb */
+
+}
+
+void HopOffPages() {
+	/*
+	 * Se bajan todas la p‡ginas del proceso que se estaba ejecutando.
+	 */
+
+	/*char * newStack = (char*) krealloc(actual->pid);
+	unsigned int offset = (unsigned int) actual->stack - actual->esp;
+	actual->esp = (unsigned int) newStack - offset;
+	actual->stack = newStack;*/
+
+	/*PROCESS * p = (PROCESS *)GetProcessByPID(CurrentPID);
+	//int currpage = get_stack_start(p->pdir);
+
+	int table_num = p->pdir/1024;
+	int table_offset = p->pdir%1024;
+	int table_frame = PAGE_DIR + PAGE_SIZE + PAGE_SIZE*table_num +table_offset;
+	table_frame = table_frame & 0xFFF0;*/
+
+
+}
+
+PROCESS* TakeUpPages(PROCESS* p){
+	/**
+	 * Se suben todas las p‡ginas del proceso que se va a ejecutar.
+	 */
+	/*int table_num = p->pdir/1024;
+	int table_offset = p->pdir%1024;
+	int table_frame = PAGE_DIR + PAGE_SIZE + PAGE_SIZE*table_num +table_offset;
+	table_frame |= 7;*/
+
+	return p;
+}
+
 

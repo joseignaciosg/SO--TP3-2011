@@ -88,48 +88,6 @@ static uint32_t construct_address(uint32_t ptable_offset) {
 #define READ_PAGE true
 #define WRITE_PAGE false
 
-void page_fault_handler(uint32_t errcode, uint32_t address) {
-
-	pdir_entry * dir = ((pdir_entry *) P_DIR_START) + (address >> 22);
-	uint32_t ptable_off = address >> 12;
-	ptable_off = ptable_off & 0x000003FF;
-
-	ptable_entry *ent = (ptable_entry*) get_dir_entry_add(*dir);
-	ent += ptable_off;
-
-	if ((*dir & 0x1) == 0) {
-		//kernel panic... page tables are always in memory!!
-		while (1)
-			;
-	}
-	uint32_t add = USER_VIRTUAL_MEM_START + PAGE_SIZE * p_off;
-
-	if (*ent == 0) {
-
-		//page_down(pages[p_off]);
-		*ent = get_table_entry(add, RWUPRESENT);
-
-		// not necessary. However the page is another process' RAM, and
-		// processes should have other process' looking at their ram
-		//memset((void *)(address&(~0xfff)), 0, PAGE_SIZE);
-	} /*else {
-
-	 //search in disk for initialized page
-	 page_down(pages[p_off]);
-	 page_up( p_off, ent );
-	 }*/
-
-	//Round Robin
-
-	uint32_t off = ent - (ptable_entry *) P_TABLE_USER_START;
-	pages[p_off] = off;
-	p_off++;
-	if (p_off == PAGES_ON_MEM) {
-		p_off = 0;
-	}
-
-	return;
-}
 
 void page_fault_handler_wrapper(struct int_params* params) {
 
@@ -137,7 +95,7 @@ void page_fault_handler_wrapper(struct int_params* params) {
 	__asm__ volatile("MOVL 	%%CR2, %0" : "=r" (address) : );
 	printf("err_code:%d TABLE:%d PAGE:%d\n", params->err_code & 0xF,
 			address >> 22, (address >> 12) & 1023);
-	page_fault_handler(params->err_code, address);
+	//page_fault_handler(params->err_code, address);
 
 }
 

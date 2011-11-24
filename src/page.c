@@ -138,19 +138,24 @@ static void set_proc_ptable( uint32_t offset ) {
 	//Adress of the start of the process' page table
 
 	ptable_entry * table = (ptable_entry  *) (P_TABLE_USER_START + offset * PAGE_SIZE);
-	/*P_TABLE_USER_START es donde empiezan las tablaes del usuario, es decir, partiendo de la direccion
+	/*P_TABLE_USER_START es donde empiezan las tablas del usuario, es decir, partiendo de la direccion
 	 * inicial , sumo 4096 para el direcotrio de paginas y luedo sumo 64 * 4096 , ya que hay 64 tablas de
 	 * paginas asignadas para el kernel*/
 
 	
 	//Fill the directory entry for the process' page table
 	*dir = get_dir_entry( (uint32_t) table, RWUPRESENT);
+	/* se pone la tabla que se est‡ creando como presente en la entrada correspondiente del directorio
+	 * de paginas*/
+
 	int i = 0;
 
 	//Sets all page table entries as not present, not initialized
 	for( i = 0 ; i < PTABLE_ENTRIES ; i ++ ) {
 		table[i] = 0;
 	}
+
+
 }
 
 uint32_t get_stack_start( uint32_t pdir_offset ) {
@@ -165,6 +170,7 @@ int create_proc_table( void ) {
 		if(dirs[i] == 0) {
 			set_proc_ptable( i );
 			dirs[i] = 1;
+			printf("\n number of user table used %d\n",i);
 			return i;
 		}
 	}

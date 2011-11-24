@@ -204,7 +204,7 @@ static void create_kernel_ptable(  void* addr ) {
  * Initializes kernel pages.
  * One to one mapping
  **/
-void initializePaging( void ){
+void initializeKernelPages( void ){
 	int i,j;
 	/*las paginas de kernel si o si siempre tienen que estar presentes.
 	 * Se eligieron tener 64 tablas de p‡ginas para el kernel, por lo tanto
@@ -220,7 +220,7 @@ void initializePaging( void ){
 			 * inicializando las p‡ginas*/
 		}
     }
-    printf("leaving initializePaging\n");
+    printf("leaving initializeKernelPages\n");
 }
 
 /**
@@ -241,11 +241,10 @@ static void enable_paging( void ) {
 void init_paging( void ) {
   
 	int i;
-	initializePaging();
+	initializeKernelPages();
 
     //register_interrupt_handler ( 14, page_fault_handler_wrapper );
-
-	printf("after initializePaging\n");
+	printf("after initializeKernelPages\n");
 	setup_IDT_entry(&idt[0x0E], 0x08, (dword) &page_fault_handler_wrapper, ACS_INT, 0);/*for block_process and kill*/
 
     for(i = 0 ; i < PAGES_ON_MEM ; i ++ ) {

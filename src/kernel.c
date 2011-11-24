@@ -205,9 +205,9 @@ int kmain() {
 	initializeSemaphoreTable();
 	initializeIDT();
 	unmaskPICS();
-	printf("before initializePaging\n");
-	initializePaging();
-	printf("after initializePaging\n");
+	printf("before initializeKernelPages\n");
+	initializeKernelPages();
+	printf("after initializeKernelPages\n");
 
 	_StartCR3();
 	printf("after _StartCR3\n");

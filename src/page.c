@@ -209,7 +209,7 @@ void initializePaging( void ){
 	/*las paginas de kernel si o si siempre tienen que estar presentes.
 	 * Se eligieron tener 64 tablas de p‡ginas para el kernel, por lo tanto
 	 * las 64 primeras entradas del direcotirio de p‡ginas son para tablas del
-	 * kernel. En total, las paginas del kernel ocupan 64 *1024 *4096, sin contar
+	 * kernel. En total, las paginas del kernel ocupan 64 *1024 *4096 (256 Mb), sin contar
 	 * las p‡ginas en s’ mismas.*/
     for ( i = 0 ; i < TOTAL_KERNEL_PAGE_TABLES ; i ++ ) {
 		void *addr = (void *)(i * PTABLE_ENTRIES * PAGE_SIZE);/*salta de 4Mb en 4Mb, deja lugar para todas las paginas de una tabla */

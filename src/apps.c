@@ -52,9 +52,13 @@ void prueba2(int argc, char * argv[])
 void prueba(int argc, char * argv[])
 {
 	_Sti();
-	printf("prueba\n");
+	/*printf("prueba\n");
 	while(TRUE)
-		;
+		;*/
+    //__asm__ volatile("MOVL $0x1000C000,100 ");
+
+	int * dir = (int *) 0x1000C000;
+	dir[0] = 10;
 	return;
 }
 

@@ -152,9 +152,11 @@ static void set_proc_ptable( uint32_t offset ) {
 
 	/*REVISAR ESTO!*/
 	//Sets all page table entries as not present, not initialized
+	/*la primera pagina tendria que estar presente!*/
 	for( i =0; i < PTABLE_ENTRIES ; i ++ ) {
 		table[i] = 0;
 	}
+	/*cuando se cree un proceso ademas de crear la tabla hay que crear la primera pagina y setearla como presente*/
 
 
 }

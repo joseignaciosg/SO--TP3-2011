@@ -289,15 +289,15 @@ void checkEsp(int esp) {
 		}
 		currentEntry = entry;	/*computes page start address to compare with esp*/
 	}
-	/*1K of tolerance*/
+	/*1K/2 of tolerance*/
 	if ( ((*currentEntry)+PAGE_SIZE-esp) < 512){
 		printf("name: %s ,esp: %d, *currentEntry: %d, subtraction: %d \n",p->name,esp,*currentEntry,(*currentEntry)+PAGE_SIZE-esp);
 		/*asigns a new page*/
 		create_user_page((void*) ((uint32_t) nextAddr), RWUNPRESENT,0);
-	}/*else{
-		printf("(*currentEntry)+PAGE_SIZE - esp > one K\n");
-
-	}*/
+	}else if(((*currentEntry)+PAGE_SIZE-esp)>PAGE_SIZE){
+		/*detach last page*/
+		//detach_user_page((void*) ((uint32_t) nextAddr), RWUNPRESENT,0);
+	}
 
 
 }

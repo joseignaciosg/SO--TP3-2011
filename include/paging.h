@@ -46,6 +46,8 @@
 
 void initializePaging(void);
 
+void clear_proc_ptable(uint32_t offset);
+
 uint32_t create_proc_ptable(void);
 
 uint32_t get_stack_start(uint32_t pdir_offset);

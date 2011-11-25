@@ -61,12 +61,12 @@ void SaveESP (int ESP)
 	PROCESS* temp;
 	if (!FirstTime && !actualKilled)
 	{
-		temp = (PROCESS *)GetProcessByPID(CurrentPID);
+		temp = GetProcessByPID(CurrentPID);
 		temp->ESP = ESP;
 		if(temp->state == RUNNING)
 			temp->state = READY;
 	}
-	FirstTime = actualKilled = 0;
+	actualKilled = 0;
 	return;
 }
 
@@ -133,7 +133,7 @@ int LoadESP(PROCESS* proc)
 void SetupScheduler(void)
 {
 	idle.pdir = create_proc_ptable();
-	printf("idle stack crated. pdir = %d\n", idle.pdir);
+	//printf("idle stack crated. pdir = %d\n", idle.pdir);
 	idle.name = (char*)malloc(8);
 	idle.pid = 0;
 	idle.foreground = 0;
@@ -143,8 +143,7 @@ void SetupScheduler(void)
 	idle.tty = 0;
 	idle.stacksize = 4096;
 	idle.stackstart = get_stack_start(idle.pdir);
-	//idle.stackstart = (uint32_t)malloc(0x1000);
-	printf("idle.stackstart : %d\n", idle.stackstart);
+	//printf("idle.stackstart : %d\n", idle.stackstart);
 	idle.ESP = LoadStackFrame(Idle, 0, 0, (uint32_t)((char *)idle.stackstart + idle.stacksize), end_process);
 	idle.parent = -1;
 	idle.waitingPid = 0;

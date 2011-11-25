@@ -413,6 +413,8 @@ void end_process(void)
 		if(last100[i] == proc->pid)
 			last100[i] = -1;
 
+	clear_proc_ptable(proc->pid);
+
 	_Sti();
 
 	return ;
@@ -426,7 +428,7 @@ void kill_in_kernel(int pid)
 	int i,j;
 
 	_Cli();
-	for (j=0; j<4 ; j++){
+	for (j = 0; j < 4; j++){
 		if( pid == terminals[j].PID && usrLoged ){
 			return;
 		}
@@ -469,6 +471,8 @@ void kill_in_kernel(int pid)
 	for(i = 0; i < 100; i++)
 		if(last100[i] == proc->pid)
 			last100[i] = -1;
+
+	clear_proc_ptable(pid);
 
 	_Sti();
 

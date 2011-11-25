@@ -81,8 +81,8 @@ void page_fault_handler_wrapper(struct int_params* params) {
 void clear_proc_ptable(uint32_t offset) {
 
 	int i;
-	for(i = 0; i < MAX_PROC; i++)
-		if(dirs[i] == offset)
+	for (i = 0; i < MAX_PROC; i++)
+		if (dirs[i] == offset)
 			dirs[i] = 0;
 }
 
@@ -215,53 +215,85 @@ int LoadAuxStack() {
 	 * Se cambia al stack auxiliar (con LoadAuxStack)
 	 *
 	 */
-
 	return 0x06000000;/* 96Mb */
 
 }
 
-
 void HopOffPages() {
 
-	if(FirstTime)
-	{
+	if (FirstTime) {
 		FirstTime = 0;
 		return;
 	}
-	
+
 	PROCESS * p = GetProcessByPID(CurrentPID);
 	int j, flag = 1;
-	void * addr = (void *) ( (p->pdir + 64) * PTABLE_ENTRIES * PAGE_SIZE);
-	for (j = 0; j < PTABLE_ENTRIES && flag; j++)
-	{
+	void * addr = (void *) ((p->pdir + 64) * PTABLE_ENTRIES * PAGE_SIZE);
+	for (j = 0; j < PTABLE_ENTRIES && flag; j++) {
 		addr += j * PAGE_SIZE;
 		uint32_t pdir_offset = ((uint32_t) addr) >> 22;
 		pdir_entry *dir = (pdir_entry *) P_DIR_START + pdir_offset;
 		ptable_entry *tab = (ptable_entry *) get_dir_entry_add(*dir);
 		ptable_entry *entry = tab + ((((uint32_t) addr) >> 12) & 0x3FF);
 		flag = (*entry) & 512;
-		if(flag)
+		if (flag) {
 			(*entry) = (*entry) & 0xFFFFFFFE;
+			//printf("dir: %d - bit eight: %d\n",p->pdir,flag);
+			//int * hola = (*entry) +19;
+			//hola[0] = 2;
+		}
 	}
 
 }
-
 
 void TakeUpPages() {
 
 	PROCESS * p = GetProcessByPID(CurrentPID);
 	int j, flag = 1;
-	void * addr = (void *) ( (p->pdir + 64) * PTABLE_ENTRIES * PAGE_SIZE);
-	for (j = 0; j < PTABLE_ENTRIES && flag; j++)
-	{
+	void * addr = (void *) ((p->pdir + 64) * PTABLE_ENTRIES * PAGE_SIZE);
+	for (j = 0; j < PTABLE_ENTRIES && flag; j++) {
 		addr += j * PAGE_SIZE;
 		uint32_t pdir_offset = ((uint32_t) addr) >> 22;
 		pdir_entry *dir = (pdir_entry *) P_DIR_START + pdir_offset;
 		ptable_entry *tab = (ptable_entry *) get_dir_entry_add(*dir);
 		ptable_entry *entry = tab + ((((uint32_t) addr) >> 12) & 0x3FF);
 		flag = (*entry) & 512;
-		if(flag)
+		if (flag)
 			(*entry) = (*entry) | 1;
 	}
+}
+
+void checkEsp(int esp) {
+
+	PROCESS * p = GetProcessByPID(CurrentPID);
+	int j, flag = 1;
+
+
+	ptable_entry *currentEntry,nextEntry;
+	void * nextAddr; /*for next page to initialize*/
+
+	/*grabs index of last initialized page*/
+	void * addr = (void *) ((p->pdir + 64) * PTABLE_ENTRIES * PAGE_SIZE);
+	for (j = 0; j < PTABLE_ENTRIES ; j++) {
+		addr += j * PAGE_SIZE;
+		nextAddr = addr;
+		uint32_t pdir_offset = ((uint32_t) addr) >> 22;
+		pdir_entry *dir = (pdir_entry *) P_DIR_START + pdir_offset;
+		ptable_entry *tab = (ptable_entry *) get_dir_entry_add(*dir);
+		ptable_entry *entry = tab + ((((uint32_t) addr) >> 12) & 0x3FF);
+		flag = (*entry) & 512; /*if bit 8 == 0, breaks*/
+		//nextEntry = entry;
+		if ( !flag ){
+			break;
+		}
+		currentEntry = entry;	/*computes page start address to compare with esp*/
+	}
+	/*1K of tolerance*/
+	if ( ((*currentEntry)+PAGE_SIZE-esp) < 1024){
+		/*asign a new page*/
+		create_user_page((void*) ((uint32_t) nextAddr), RWUNPRESENT,0);
+	}
+
+
 }
 

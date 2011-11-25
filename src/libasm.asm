@@ -40,6 +40,7 @@ EXTERN GetTemporaryESP
 EXTERN LoadAuxStack
 EXTERN HopOffPages
 EXTERN TakeUpPages
+EXTERN checkEsp
 
 SECTION .text
 
@@ -172,8 +173,12 @@ _yield:
 ;		mov esp,eax
 
 _int_08_hand:				; Handler de INT 8 ( Timer tick)
-	cli
-	pushad
+		cli
+		pushad
+		mov eax, esp
+		push eax
+		call checkEsp      ; controla si el esp se va a pasar del stack
+		pop eax
 		call isTimeSlot
 		cmp eax,0
 		jne processRunning
@@ -182,7 +187,7 @@ _int_08_hand:				; Handler de INT 8 ( Timer tick)
 		call SaveESP
 		pop eax
 
-	        call LoadAuxStack           ;Se cambia al stack auxiliar
+	    call LoadAuxStack           ;Se cambia al stack auxiliar
 		mov esp, eax
 
 		call HopOffPages            ;Se bajan todas la p‡ginas del proceso que se estaba ejecutando.

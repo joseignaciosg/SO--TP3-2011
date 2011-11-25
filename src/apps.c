@@ -37,7 +37,7 @@ void prioridad(int argc, char * argv[])
 
 void prueba2(int argc, char * argv[])
 {
-	int i = 50000000;
+	/*int i = 50000000;
 	CreateProcessAt("Prueba", (int(*)(int, char**))prueba, currentProcessTTY, 0, (char**)0, 0x400, 2, 1);
 	CreateProcessAt("Prueba", (int(*)(int, char**))prueba, currentProcessTTY, 0, (char**)0, 0x400, 2, 1);
 	CreateProcessAt("Prueba", (int(*)(int, char**))prueba, currentProcessTTY, 0, (char**)0, 0x400, 2, 1);
@@ -45,7 +45,9 @@ void prueba2(int argc, char * argv[])
 	printf("prueba2\n");
 	while(i--)
 		;
+	 */
 
+	prueba2(argc,argv);
 	return;
 }
 

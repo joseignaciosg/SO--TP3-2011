@@ -61,7 +61,7 @@ static ptable_entry get_table_entry(uint32_t address, uint32_t perms, int flag) 
 	if (flag) {
 		ret |= 512; //octavo bit en 1
 		printf("\ntable entry %d\n", (ret >> 9) & 0x1);/*print bit 8*/
-		printf("ret: %d\n",ret);
+		printf("ret: %d\n", ret);
 
 	}
 	return ret;
@@ -252,24 +252,33 @@ int LoadAuxStack() {
 	 *
 	 */
 
-	/*STACK_FRAME * frame = (STACK_FRAME*) (bottom - sizeof(STACK_FRAME));
-	 frame->EBP = 0;
-	 frame->EIP = (int) process;
-	 frame->CS = 0x08;
-	 frame->EFLAGS = 0;
-	 frame->retaddr = cleaner;
-	 frame->argc = argc;
-	 frame->argv = argv;
-	 return (int) frame;
-	 return LoadStackFrame(
-	 (int(*)(int, char**)) shell,
-	 param->argc,
-	 param->argv,
-	 (uint32_t) ((char *) proc->stackstart + proc->stacksize), end_process);
-	 */
-
 	return 0x06000000;/* 96Mb */
 
+}
+
+int page_down_attemp(int * addr) {
+	printf("\n addr %d:", (int) (*addr));
+	return ((unsigned) addr >> 9) & 0x1;
+}
+
+void page_down(void * addr) {
+	unsigned ret = (unsigned) addr & 0xFFFFFFFE;
+	printf("hop off :%d", ret);
+	addr = (void*) ret;
+}
+
+static ptable_entry page_down2(uint32_t addr, int * flag) {
+	(*flag) = 0;
+	addr += 519;
+	int bit = ((unsigned) addr >> 9) & 0x1;/*bit 8*/
+	ptable_entry ret = addr;
+	if (bit) {
+		printf("\n addr %d:", (int) (addr));
+		ret = (ptable_entry) addr & 0xFFFFFFFE;
+		(*flag) = 1;
+	}
+	printf("inside page_down2 - addr: %d - flag: %d\n", ret, *flag);
+	return ret;
 }
 
 void HopOffPages() {
@@ -282,31 +291,42 @@ void HopOffPages() {
 	 actual->esp = (unsigned int) newStack - offset;
 	 actual->stack = newStack;*/
 
-
-	int page_down_attemp(int * addr){
-		printf("\n addr %d:",(int)(*addr));
-		return ((unsigned)addr >> 9) & 0x1;
-	}
-
-	void page_down(void * addr){
-		unsigned ret = (unsigned)addr & 0xFFFFFFFE;
-		printf("hop off :%d",ret);
-		addr = (void*)ret;
-	}
-
 	PROCESS * p = (PROCESS *) GetProcessByPID(CurrentPID);
 	//int currpage = get_stack_start(p->pdir);
 	//printf("pdir %d\n", p->pdir);
-	void *addr = (void *) (P_DIR_START + PAGE_SIZE + (p->pdir + 64) * PAGE_SIZE);
-	int flag = 1;
-	int j;
-	for (j = 0; (j < PTABLE_ENTRIES) && flag; j++) {
-		//printf("addr %d\n", addr + j);
-		flag = page_down_attemp((void*) ((uint32_t) addr + j ));
-		if (flag) {
-			page_down((void*) (uint32_t) addr + j);
-		}
-	}
+	/*void *addr = (void *) (P_TABLE_START + (p->pdir + 64) * PAGE_SIZE);
+	 int flag = 1;
+	 int j;
+	 for (j = 0; (j < PTABLE_ENTRIES) && flag; j++) {
+	 //printf("addr %d\n", addr + j);
+	 flag = page_down_attemp((void*) ((uint32_t) addr + j ));
+	 if (flag) {
+	 page_down((void*) (uint32_t) addr + j);
+	 }
+	 }*/
+
+//	int j;
+//	int flag = 1;
+//	void *addr = (void *) ((p->pdir+64) * PTABLE_ENTRIES * PAGE_SIZE);/*salta de 4Mb en 4Mb, deja lugar para todas las paginas de una tabla */
+//	for (j = 0; j < PTABLE_ENTRIES && flag; j++) {
+//		void * addr2 = (void*) ((uint32_t) addr + j * PAGE_SIZE);
+//		uint32_t pdir_offset = ((uint32_t) addr2) >> 22;
+//		pdir_entry *dir = (pdir_entry *) P_DIR_START + pdir_offset; /*busca la tabla con el offset anterior*/
+//		ptable_entry *tab = (ptable_entry *) get_dir_entry_add(*dir); /*se queda con los 20 bits mas significativos*/
+//		ptable_entry *entry = tab + ((((uint32_t) addr2) >> 12) & 0x3FF); /*se queda con los 10 bits menos significativos
+//		 de addr*/
+//		*entry = page_down2((uint32_t) addr2, &flag);
+//	}
+
+	pdir_entry *dir = (pdir_entry *) P_DIR_START;
+
+	//Get the virtual address for the process
+	uint32_t mem = USER_VIRTUAL_MEM_START + PAGE_SIZE * 1024 * offset;
+
+	dir += (mem >> 22); /*entrada del directorio de paginas que apunta a la tabla*/
+	//Adress of the start of the process' page table
+
+	ptable_entry * table = (ptable_entry *) (P_TABLE_USER_START + offset * PAGE_SIZE);
 
 }
 

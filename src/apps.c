@@ -27,82 +27,83 @@
 
 processCPU top100[100];
 
-
-void prioridad(int argc, char * argv[])
-{
+void prioridad(int argc, char * argv[]) {
 	_Sti();
-	while(TRUE)
-	;
+	while (TRUE)
+		;
 }
 
-void prueba2(int argc, char * argv[])
-{
+void recursive(int a) {
+	int x,q,w/*,e,r,t,y,u,i,o,s,df,g,h,j,k,c,v,b,n,m,l*/;
+
+	while (a < 1000) {
+		x = 0;
+		while (x < 100) {
+			x++;
+		}
+		a++;
+	}
+	printf("calling recursive\n");
+	recursive(0);
+}
+
+void prueba2(int argc, char * argv[]) {
 	/*int i = 50000000;
-	CreateProcessAt("Prueba", (int(*)(int, char**))prueba, currentProcessTTY, 0, (char**)0, 0x400, 2, 1);
-	CreateProcessAt("Prueba", (int(*)(int, char**))prueba, currentProcessTTY, 0, (char**)0, 0x400, 2, 1);
-	CreateProcessAt("Prueba", (int(*)(int, char**))prueba, currentProcessTTY, 0, (char**)0, 0x400, 2, 1);
-	_Sti();
-	printf("prueba2\n");
-	while(i--)
-		;
+	 CreateProcessAt("Prueba", (int(*)(int, char**))prueba, currentProcessTTY, 0, (char**)0, 0x400, 2, 1);
+	 CreateProcessAt("Prueba", (int(*)(int, char**))prueba, currentProcessTTY, 0, (char**)0, 0x400, 2, 1);
+	 CreateProcessAt("Prueba", (int(*)(int, char**))prueba, currentProcessTTY, 0, (char**)0, 0x400, 2, 1);
+	 _Sti();
+	 printf("prueba2\n");
+	 while(i--)
+	 ;
 	 */
 
-	prueba2(argc,argv);
+	recursive(0);
 	return;
 }
 
-void prueba(int argc, char * argv[])
-{
+void prueba(int argc, char * argv[]) {
 	_Sti();
 	/*printf("prueba\n");
-	while(TRUE)
-		;*/
-    //__asm__ volatile("MOVL $0x1000C000,100 ");
-
+	 while(TRUE)
+	 ;*/
+	//__asm__ volatile("MOVL $0x1000C000,100 ");
 	int * dir = (int *) 0x1000A000;
 	dir[0] = 10;
 	return;
 }
 
-
-void top(int argc, char * argv[])
-{
+void top(int argc, char * argv[]) {
 	int i, j, length, pos;
 	PROCESS * proc;
 	_Sti();
-	while(TRUE)
-	{
-		for(i = 0; i < 100; i++)
-		{
+	while (TRUE) {
+		for (i = 0; i < 100; i++) {
 			top100[i].pid = -1;
 			top100[i].cpu = 0;
 		}
 		pos = 0;
-		for(i = 0; i < 100; i++)
-		{
-			if(last100[i] == -1)
-			{
-				if(top100[pos].pid == -1)
+		for (i = 0; i < 100; i++) {
+			if (last100[i] == -1) {
+				if (top100[pos].pid == -1)
 					pos = 0;
 				top100[pos].cpu++;
 				pos++;
-			}
-			else{
+			} else {
 				j = 0;
-				while(top100[j].pid != last100[i] && top100[j].pid != -1)
+				while (top100[j].pid != last100[i] && top100[j].pid != -1)
 					j++;
 				top100[j].pid = last100[i];
 				top100[j].cpu++;
 			}
 		}
 		printf("Process Name        cpu       PID\n");
-		for(j = 0; top100[j].pid != -1; j++)
-		{
+		for (j = 0; top100[j].pid != -1; j++) {
 			length = 20;
 			proc = (PROCESS *) GetProcessByPID(top100[j].pid);
 			printf("%s", proc->name);
 			length -= str_len(proc->name);
-			while(length--)
+			while (length--)
 				putc(' ');
 			printf("%d         %d\n", top100[j].cpu, top100[j].pid);
 		}
@@ -111,34 +112,34 @@ void top(int argc, char * argv[])
 	}
 }
 
-void fifo_writer_test(int argc, char * argv[]){
-	int * fd = (int *)malloc(2 * sizeof(int));
-	char * buff = (char *)malloc(9);
+void fifo_writer_test(int argc, char * argv[]) {
+	int * fd = (int *) malloc(2 * sizeof(int));
+	char * buff = (char *) malloc(9);
 	mkfifo(fd);
-	CreateProcessAt("fifo_reader", (int(*)(int, char**))fifo_reader_test, 1, (int)fd, 0, 0x400, 2, 1);
+	CreateProcessAt("fifo_reader", (int(*)(int, char**)) fifo_reader_test, 1,
+			(int) fd, 0, 0x400, 2, 1);
 	sleep(3);
-	write_fifo(fd[0],"hello   ",8);
+	write_fifo(fd[0], "hello   ", 8);
 	sleep(3);
-	write_fifo(fd[0],"how are ",8);
+	write_fifo(fd[0], "how are ", 8);
 	sleep(3);
-	write_fifo(fd[0],"you?    ",8);
-	read_fifo(fd[1],buff,9);
+	write_fifo(fd[0], "you?    ", 8);
+	read_fifo(fd[1], buff, 9);
 	printf("fifo_writer receives: %s\n", buff);
 	rmfifo(fd);
 
-
 }
 
-void fifo_reader_test(int argc, char * argv[]){
-	int * fd = (int *)argc;
-	char * buff = (char *)malloc(8);
-	int i=0;
-	while(i<3){
-		read_fifo(fd[0],buff, 8);
-		printf("fifo_reader receives: %s\n",buff);
+void fifo_reader_test(int argc, char * argv[]) {
+	int * fd = (int *) argc;
+	char * buff = (char *) malloc(8);
+	int i = 0;
+	while (i < 3) {
+		read_fifo(fd[0], buff, 8);
+		printf("fifo_reader receives: %s\n", buff);
 		i++;
 	}
-	write_fifo(fd[1],"just fine",9);
+	write_fifo(fd[1], "just fine", 9);
 	return;
 }
 

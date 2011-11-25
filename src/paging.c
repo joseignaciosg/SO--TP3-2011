@@ -284,15 +284,20 @@ void checkEsp(int esp) {
 		flag = (*entry) & 512; /*if bit 8 == 0, breaks*/
 		//nextEntry = entry;
 		if ( !flag ){
+			//printf("j= %d\n",j);
 			break;
 		}
 		currentEntry = entry;	/*computes page start address to compare with esp*/
 	}
 	/*1K of tolerance*/
-	if ( ((*currentEntry)+PAGE_SIZE-esp) < 1024){
-		/*asign a new page*/
+	if ( ((*currentEntry)+PAGE_SIZE-esp) < 512){
+		printf("name: %s ,esp: %d, *currentEntry: %d, subtraction: %d \n",p->name,esp,*currentEntry,(*currentEntry)+PAGE_SIZE-esp);
+		/*asigns a new page*/
 		create_user_page((void*) ((uint32_t) nextAddr), RWUNPRESENT,0);
-	}
+	}/*else{
+		printf("(*currentEntry)+PAGE_SIZE - esp > one K\n");
+
+	}*/
 
 
 }

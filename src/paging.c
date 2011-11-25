@@ -61,6 +61,8 @@ static ptable_entry get_table_entry(uint32_t address, uint32_t perms, int flag) 
 	if (flag) {
 		ret |= 512; //octavo bit en 1
 		printf("\ntable entry %d\n", (ret >> 9) & 0x1);/*print bit 8*/
+		printf("ret: %d\n",ret);
+
 	}
 	return ret;
 }
@@ -165,8 +167,6 @@ static void set_proc_ptable(uint32_t offset) {
 
 uint32_t get_stack_start(uint32_t pdir_offset) {
 
-	printf("stack start %d\n",
-			USER_VIRTUAL_MEM_START + pdir_offset * PAGE_SIZE * PTABLE_ENTRIES);
 	return USER_VIRTUAL_MEM_START + pdir_offset * PAGE_SIZE * PTABLE_ENTRIES;
 }
 
@@ -224,7 +224,7 @@ void initializePaging(void) {
 	int i, j;
 	/*las paginas de kernel si o si siempre tienen que estar presentes.
 	 * Se eligieron tener 64 tablas de p‡ginas para el kernel, por lo tanto
-	 * las 64 primeras entradas del direcotirio de p‡ginas son para tablas del
+	 * las 64 primeras entradas del directorio de p‡ginas son para tablas del
 	 * kernel. En total, las paginas del kernel ocupan 64 *1024 *4096 (256 Mb),
 	 * sin contar las tablas en s’ mismas.*/
 	for (i = 0; i < TOTAL_KERNEL_PAGE_TABLES; i++) {
@@ -283,8 +283,8 @@ void HopOffPages() {
 	 actual->stack = newStack;*/
 
 
-	int page_down_attemp(void* addr){
-		//printf("\n addr %d:",addr);
+	int page_down_attemp(int * addr){
+		printf("\n addr %d:",(int)(*addr));
 		return ((unsigned)addr >> 9) & 0x1;
 	}
 
@@ -297,15 +297,13 @@ void HopOffPages() {
 	PROCESS * p = (PROCESS *) GetProcessByPID(CurrentPID);
 	//int currpage = get_stack_start(p->pdir);
 	//printf("pdir %d\n", p->pdir);
-	void *addr = (void *) (P_DIR_START + PAGE_SIZE
-			+ (p->pdir + 64) * PAGE_SIZE);
+	void *addr = (void *) (P_DIR_START + PAGE_SIZE + (p->pdir + 64) * PAGE_SIZE);
 	int flag = 1;
 	int j;
-	for (j = 0; j < PTABLE_ENTRIES && flag; j++) {
+	for (j = 0; (j < PTABLE_ENTRIES) && flag; j++) {
 		//printf("addr %d\n", addr + j);
 		flag = page_down_attemp((void*) ((uint32_t) addr + j ));
 		if (flag) {
-			//la bajo
 			page_down((void*) (uint32_t) addr + j);
 		}
 	}

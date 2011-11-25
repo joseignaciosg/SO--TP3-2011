@@ -57,7 +57,7 @@ void prueba(int argc, char * argv[])
 		;*/
     //__asm__ volatile("MOVL $0x1000C000,100 ");
 
-	int * dir = (int *) 0x1000C000;
+	int * dir = (int *) 0x1000A000;
 	dir[0] = 10;
 	return;
 }

@@ -1,6 +1,6 @@
 /********************************** 
  *
- *  	paging.c
+ *  paging.c
  *  	Galindo, Jose Ignacio
  *  	Homovc, Federico
  *  	Loreti, Nicolas
@@ -58,9 +58,9 @@ static ptable_entry get_table_entry(uint32_t address, uint32_t perms, int flag) 
 	pdir_entry ret = address & 0xFFFFF000;
 	ret |= perms;
 	/*proof*/
-	if (flag){
+	if (flag) {
 		ret |= 512; //octavo bit en 1
-		printf("\ntable entry %d - ret %d \n",(ret>>9)&0x1, ret);/*print bit 8*/
+		printf("\ntable entry %d\n", (ret >> 9) & 0x1);/*print bit 8*/
 	}
 	return ret;
 }
@@ -94,7 +94,6 @@ static uint32_t construct_address(uint32_t ptable_offset) {
 #define READ_PAGE true
 #define WRITE_PAGE false
 
-
 void page_fault_handler_wrapper(struct int_params* params) {
 
 	uint32_t address = 0;
@@ -110,14 +109,14 @@ void clear_proc_ptable(uint32_t offset) {
 	dirs[offset] = 0;
 }
 
-static void create_user_page(void* addr, int perms,int flag) {
+static void create_user_page(void* addr, int perms, int flag) {
 
 	uint32_t pdir_offset = ((uint32_t) addr) >> 22;/*va desde 0 a 63, para ver donde comienza la tabla en cuestion*/
 	pdir_entry *dir = (pdir_entry *) P_DIR_START + pdir_offset; /*busca la tabla con el offset anterior*/
 	ptable_entry *tab = (ptable_entry *) get_dir_entry_add(*dir); /*se queda con los 20 bits mas significativos*/
 	ptable_entry *entry = tab + ((((uint32_t) addr) >> 12) & 0x3FF); /*se queda con los 10 bits menos significativos
 	 de addr*/
-	*entry = get_table_entry((uint32_t) addr, perms,flag); /*setea el page frame address de la pagina, poniendola
+	*entry = get_table_entry((uint32_t) addr, perms, flag); /*setea el page frame address de la pagina, poniendola
 	 como presente*/
 }
 
@@ -146,18 +145,28 @@ static void set_proc_ptable(uint32_t offset) {
 
 	int j;
 
-	void *addr = (void *) ( ( offset +64 ) * PTABLE_ENTRIES * PAGE_SIZE);
-	create_user_page((void*) ((uint32_t) addr + 0 ),RWUPRESENT,1);
+	void *addr = (void *) ((offset + 64) * PTABLE_ENTRIES * PAGE_SIZE);
+	create_user_page((void*) ((uint32_t) addr + 0 ), RWUPRESENT,1);
+
 	for (j = 1; j < PTABLE_ENTRIES; j++) {
-		create_user_page((void*) ((uint32_t) addr + j * PAGE_SIZE),RWUNPRESENT,0);
+		create_user_page(
+				(void*) ((uint32_t) addr + j * PAGE_SIZE), RWUNPRESENT,0);
 	}
 
+	/*REVISAR ESTO!*/
+	//Sets all page table entries as not present, not initialized
+	/*la primera pagina tendria que estar presente!*/
+	/*for( i = 0; i < PTABLE_ENTRIES ; i ++ ) {
+	 table[i] = 0;
+	 }*/
+	/*cuando se cree un proceso ademas de crear la tabla hay que crear la primera pagina y setearla como presente*/
 
 }
 
 uint32_t get_stack_start(uint32_t pdir_offset) {
 
-	printf("stack start %d\n",USER_VIRTUAL_MEM_START + pdir_offset * PAGE_SIZE * PTABLE_ENTRIES);
+	printf("stack start %d\n",
+			USER_VIRTUAL_MEM_START + pdir_offset * PAGE_SIZE * PTABLE_ENTRIES);
 	return USER_VIRTUAL_MEM_START + pdir_offset * PAGE_SIZE * PTABLE_ENTRIES;
 }
 
@@ -168,7 +177,7 @@ uint32_t create_proc_ptable(void) {
 		if (dirs[i] == 0) {
 			set_proc_ptable(i);
 			dirs[i] = 1;
-			printf(" \n number of user table used %d\n",i);
+			printf(" number of user table used %d\n", i);
 			return i;
 		}
 	}
@@ -189,7 +198,7 @@ static void create_kernel_page(void* addr) {
 	ptable_entry *tab = (ptable_entry *) get_dir_entry_add(*dir); /*se queda con los 20 bits mas significativos*/
 	ptable_entry *entry = tab + ((((uint32_t) addr) >> 12) & 0x3FF); /*se queda con los 10 bits menos significativos
 	 de addr*/
-	*entry = get_table_entry((uint32_t) addr, RWUPRESENT,0); /*setea el page frame address de la pagina, poniendola
+	*entry = get_table_entry((uint32_t) addr, RWUPRESENT, 0); /*setea el page frame address de la pagina, poniendola
 	 como presente*/
 }
 
@@ -237,42 +246,30 @@ void initializePaging(void) {
 	return;
 }
 
-int LoadAuxStack()
-{
+int LoadAuxStack() {
 	/*
 	 * Se cambia al stack auxiliar (con LoadAuxStack)
 	 *
 	 */
 
 	/*STACK_FRAME * frame = (STACK_FRAME*) (bottom - sizeof(STACK_FRAME));
-	frame->EBP = 0;
-	frame->EIP = (int) process;
-	frame->CS = 0x08;
-	frame->EFLAGS = 0;
-	frame->retaddr = cleaner;
-	frame->argc = argc;
-	frame->argv = argv;
-	return (int) frame;
-	return LoadStackFrame(
-			(int(*)(int, char**)) shell,
-			param->argc,
-			param->argv,
-			(uint32_t) ((char *) proc->stackstart + proc->stacksize), end_process);
-	*/
+	 frame->EBP = 0;
+	 frame->EIP = (int) process;
+	 frame->CS = 0x08;
+	 frame->EFLAGS = 0;
+	 frame->retaddr = cleaner;
+	 frame->argc = argc;
+	 frame->argv = argv;
+	 return (int) frame;
+	 return LoadStackFrame(
+	 (int(*)(int, char**)) shell,
+	 param->argc,
+	 param->argv,
+	 (uint32_t) ((char *) proc->stackstart + proc->stacksize), end_process);
+	 */
 
 	return 0x06000000;/* 96Mb */
 
-}
-
-int page_down_attemp(void* addr){
-	printf("\n addr %d:",addr);
-	return ((unsigned)addr >> 9) & 0x1;
-}
-
-void page_down(void * addr){
-	unsigned ret = (unsigned)addr & 0xFFFFFFFE;
-	printf("hop off :%d",ret);
-	addr = (void*)ret;
 }
 
 void HopOffPages() {
@@ -281,38 +278,49 @@ void HopOffPages() {
 	 */
 
 	/*char * newStack = (char*) krealloc(actual->pid);
-	unsigned int offset = (unsigned int) actual->stack - actual->esp;
-	actual->esp = (unsigned int) newStack - offset;
-	actual->stack = newStack;*/
+	 unsigned int offset = (unsigned int) actual->stack - actual->esp;
+	 actual->esp = (unsigned int) newStack - offset;
+	 actual->stack = newStack;*/
 
-	PROCESS * p = (PROCESS *)GetProcessByPID(CurrentPID);
-	//int currpage = get_stack_start(p->pdir);
-	printf("pdir %d\n",p->pdir);
-	void *addr = (void *) ( P_DIR_START + PAGE_SIZE + ( p->pdir +64 )  * PAGE_SIZE);
-	int flag =1;
-	int j;
-	for (j = 0; j < PTABLE_ENTRIES && flag ; j++) {
-			printf("addr %d\n",addr + j);
-			flag = page_down_attemp((void*) ((uint32_t) addr + j ));
-			if (flag){
-				//la bajo
-				page_down((void*)  (uint32_t) addr + j );
-			}
+
+	int page_down_attemp(void* addr){
+		//printf("\n addr %d:",addr);
+		return ((unsigned)addr >> 9) & 0x1;
 	}
 
+	void page_down(void * addr){
+		unsigned ret = (unsigned)addr & 0xFFFFFFFE;
+		printf("hop off :%d",ret);
+		addr = (void*)ret;
+	}
+
+	PROCESS * p = (PROCESS *) GetProcessByPID(CurrentPID);
+	//int currpage = get_stack_start(p->pdir);
+	//printf("pdir %d\n", p->pdir);
+	void *addr = (void *) (P_DIR_START + PAGE_SIZE
+			+ (p->pdir + 64) * PAGE_SIZE);
+	int flag = 1;
+	int j;
+	for (j = 0; j < PTABLE_ENTRIES && flag; j++) {
+		//printf("addr %d\n", addr + j);
+		flag = page_down_attemp((void*) ((uint32_t) addr + j ));
+		if (flag) {
+			//la bajo
+			page_down((void*) (uint32_t) addr + j);
+		}
+	}
 
 }
 
-PROCESS* TakeUpPages(PROCESS* p){
+PROCESS* TakeUpPages(PROCESS* p) {
 	/**
 	 * Se suben todas las p‡ginas del proceso que se va a ejecutar.
 	 */
 	/*int table_num = p->pdir/1024;
-	int table_offset = p->pdir%1024;
-	int table_frame = PAGE_DIR + PAGE_SIZE + PAGE_SIZE*table_num +table_offset;
-	table_frame |= 7;*/
+	 int table_offset = p->pdir%1024;
+	 int table_frame = PAGE_DIR + PAGE_SIZE + PAGE_SIZE*table_num +table_offset;
+	 table_frame |= 7;*/
 
 	return p;
 }
-
 

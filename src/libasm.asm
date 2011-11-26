@@ -175,10 +175,6 @@ _yield:
 _int_08_hand:				; Handler de INT 8 ( Timer tick)
 		cli
 		pushad
-		mov eax, esp
-		push eax
-		call checkEsp      ; controla si el esp se va a pasar del stack
-		pop eax
 		call isTimeSlot
 		cmp eax,0
 		jne processRunning
@@ -201,9 +197,14 @@ _int_08_hand:				; Handler de INT 8 ( Timer tick)
 		pop ebx
 		mov esp,eax
 
-processRunning:	mov al,20h			; Envio de EOI generico al PIC
+processRunning:
+		mov eax, esp
+		push eax
+		call checkEsp      ; controla si el esp se va a pasar del stack
+		pop eax
+		mov al,20h			; Envio de EOI generico al PIC
 		out 20h,al
-	popad
+		popad
 	
 	sti
 	

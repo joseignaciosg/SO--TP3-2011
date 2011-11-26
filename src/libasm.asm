@@ -206,9 +206,9 @@ processRunning:
 		out 20h,al
 		popad
 	
-	sti
+		sti
 	
-	iret
+		iret
 
 
 _int_09_hand:      ;Handler de INT 09 (IN y OUT)

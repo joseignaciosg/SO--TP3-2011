@@ -161,27 +161,33 @@ static void set_proc_ptable(uint32_t offset) {
 
 
 	/*tiene que ir de atras para adelante TODO*/
-	/*void *addr = (void *) (( 1023 - offset) * PTABLE_ENTRIES * PAGE_SIZE);
-	create_user_page((void*) ((uint32_t) addr + 0 ), RWUPRESENT,1);
-
-	for (j = 1022; j < (PTABLE_ENTRIES - 64) ; j--) {
-		create_user_page(
-				(void*) ((uint32_t) addr + j * PAGE_SIZE), RWUNPRESENT,0);
-	}*/
-
 	void *addr = (void *) ((offset + 64) * PTABLE_ENTRIES * PAGE_SIZE);
+	addr += (PTABLE_ENTRIES * PAGE_SIZE) -1;
+	printf("here\n");
+	create_user_page((void*) ((uint32_t) addr - 0 ), RWUPRESENT,1);
+
+	for (j = 1; j < PTABLE_ENTRIES ; j++) {
+		create_user_page((void*) ((uint32_t) addr - j * PAGE_SIZE), RWUNPRESENT,0);
+	}
+
+	printf("inside set_proc_ptable \n");
+
+
+
+
+	/*void *addr = (void *) ((offset + 64) * PTABLE_ENTRIES * PAGE_SIZE);
 	create_user_page((void*) ((uint32_t) addr + 0 ), RWUPRESENT,1);
 
 	for (j = 1; j < PTABLE_ENTRIES; j++) {
 		create_user_page(
 				(void*) ((uint32_t) addr + j * PAGE_SIZE), RWUNPRESENT,0);
-	}
+	}*/
 }
 
 uint32_t get_stack_start(uint32_t pdir_offset) {
 
-	//return USER_VIRTUAL_MEM_START + pdir_offset * PAGE_SIZE * PTABLE_ENTRIES + PAGE_SIZE ;
-	return USER_VIRTUAL_MEM_START + pdir_offset * PAGE_SIZE * PTABLE_ENTRIES;
+	return USER_VIRTUAL_MEM_START + pdir_offset * PAGE_SIZE * PTABLE_ENTRIES + ( (PAGE_SIZE * PTABLE_ENTRIES) - 1) ;
+	//return USER_VIRTUAL_MEM_START + pdir_offset * PAGE_SIZE * PTABLE_ENTRIES;
 }
 
 uint32_t create_proc_ptable(void) {
@@ -194,6 +200,7 @@ uint32_t create_proc_ptable(void) {
 			printf("create_proc_ptable dirs i = %d , pid = %d\n", i,
 					nextPID - 1);
 
+			printf("leaving create_proc_ptable\n");
 			return i;
 		}
 	}
@@ -282,8 +289,9 @@ void HopOffPages() {
 	PROCESS * p = GetProcessByPID(CurrentPID);
 	int j, flag = 1;
 	void * addr = (void *) ((p->pdir + 64) * PTABLE_ENTRIES * PAGE_SIZE);
-	for (j = 0; j < PTABLE_ENTRIES && flag; j++) {
-		addr += j * PAGE_SIZE;
+	addr += (PTABLE_ENTRIES * PAGE_SIZE ) - 1;
+	for (j = 0;  ( j < PTABLE_ENTRIES ) && flag; j++) {
+		addr -= j * PAGE_SIZE;
 		uint32_t pdir_offset = ((uint32_t) addr) >> 22;
 		pdir_entry *dir = (pdir_entry *) P_DIR_START + pdir_offset;
 		ptable_entry *tab = (ptable_entry *) get_dir_entry_add(*dir);
@@ -303,9 +311,21 @@ void TakeUpPages() {
 
 	PROCESS * p = GetProcessByPID(CurrentPID);
 	int j, flag = 1;
-	void * addr = (void *) ((p->pdir + 64) * PTABLE_ENTRIES * PAGE_SIZE);
+	/*void * addr = (void *) ((p->pdir + 64) * PTABLE_ENTRIES * PAGE_SIZE);
 	for (j = 0; j < PTABLE_ENTRIES && flag; j++) {
 		addr += j * PAGE_SIZE;
+		uint32_t pdir_offset = ((uint32_t) addr) >> 22;
+		pdir_entry *dir = (pdir_entry *) P_DIR_START + pdir_offset;
+		ptable_entry *tab = (ptable_entry *) get_dir_entry_add(*dir);
+		ptable_entry *entry = tab + ((((uint32_t) addr) >> 12) & 0x3FF);
+		flag = (*entry) & 512;
+		if (flag)
+			(*entry) = (*entry) | 1;
+	}*/
+	void * addr = (void *) ((p->pdir + 64) * PTABLE_ENTRIES * PAGE_SIZE);
+	addr += (PTABLE_ENTRIES * PAGE_SIZE ) - 1;
+	for (j = 0;  ( j < PTABLE_ENTRIES ) && flag; j++) {
+		addr -= j * PAGE_SIZE;
 		uint32_t pdir_offset = ((uint32_t) addr) >> 22;
 		pdir_entry *dir = (pdir_entry *) P_DIR_START + pdir_offset;
 		ptable_entry *tab = (ptable_entry *) get_dir_entry_add(*dir);
@@ -325,7 +345,7 @@ void checkEsp(int esp) {
 	void * nextAddr; /*for next page to initialize*/
 
 	/*grabs index of last initialized page*/
-	void * addr = (void *) ((p->pdir + 64) * PTABLE_ENTRIES * PAGE_SIZE);
+	/*void * addr = (void *) ((p->pdir + 64) * PTABLE_ENTRIES * PAGE_SIZE);
 	for (j = 0; j < PTABLE_ENTRIES; j++) {
 		addr += j * PAGE_SIZE;
 		nextAddr = addr;
@@ -333,20 +353,35 @@ void checkEsp(int esp) {
 		pdir_entry *dir = (pdir_entry *) P_DIR_START + pdir_offset;
 		ptable_entry *tab = (ptable_entry *) get_dir_entry_add(*dir);
 		ptable_entry *entry = tab + ((((uint32_t) addr) >> 12) & 0x3FF);
-		flag = (*entry) & 512; /*if bit 8 == 0, breaks*/
 		if (!flag) {
 			//printf("j= %d\n",j);
 			break;
 		}
-		currentEntry = entry; /*computes page start address to compare with esp*/
+		currentEntry = entry; //computes page start address to compare with esp
+	}*/
+
+	void * addr = (void *) ((p->pdir + 64) * PTABLE_ENTRIES * PAGE_SIZE);
+	addr += (PTABLE_ENTRIES * PAGE_SIZE ) - 1;
+	for (j = 0;  ( j < PTABLE_ENTRIES ) && flag; j++) {
+		addr -= j * PAGE_SIZE;
+		nextAddr = addr;
+		uint32_t pdir_offset = ((uint32_t) addr) >> 22;
+		pdir_entry *dir = (pdir_entry *) P_DIR_START + pdir_offset;
+		ptable_entry *tab = (ptable_entry *) get_dir_entry_add(*dir);
+		ptable_entry *entry = tab + ((((uint32_t) addr) >> 12) & 0x3FF);
+		if (!flag) {
+			//printf("j= %d\n",j);
+			break;
+		}
+		currentEntry = entry; //computes page start address to compare with esp
 	}
 
 	/*debugging*/
-	if (p->pid == 6) {
+	/*if (p->pid == 6) {
 		printf("last initialized page %d\n", j - 1);
 		printf("pdir %d\n", p->pdir);
 		printf("name: %s ,esp: %d, *currentEntry: %d, subtraction: %d \n",p->name,esp,(*currentEntry),esp-(*currentEntry));
-	}
+	}*/
 
 
 	/*512 bytes of tolerance*/

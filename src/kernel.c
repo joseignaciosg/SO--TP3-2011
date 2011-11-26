@@ -271,10 +271,13 @@ PROCESS * GetProcessByPID(int pid)
 int CreateProcessAt_in_kernel(createProcessParam * param)
 {
 	PROCESS * proc;
+	printf("inside CreateProcessAt_in_kernel\n");
 	proc = malloc(sizeof(PROCESS));
 	proc->name = (char*)malloc(15);
 	proc->pid = nextPID++;
+	printf("before create_proc_ptable()\n ");
 	proc->pdir = create_proc_ptable();
+	printf("after create_proc_ptable()\n ");
 	proc->foreground = param->isFront;
 	proc->priority = param->priority;
 	memcpy(proc->name, param->name,str_len(param->name) + 1);
@@ -285,7 +288,7 @@ int CreateProcessAt_in_kernel(createProcessParam * param)
 	proc->stackstart = get_stack_start(proc->pdir);
 	printf("after get_stack_start in kernel\n");
 	//proc->stackstart = (uint32_t)malloc(1024 * 4096);
-	proc->ESP = LoadStackFrame(param->process, param->argc, param->argv, (uint32_t)((char *)proc->stackstart + proc->stacksize), end_process);
+	proc->ESP = LoadStackFrame(param->process, param->argc, param->argv, (uint32_t)((char *)proc->stackstart /*+ proc->stacksize*/), end_process);
 	proc->parent = CurrentPID;
 	proc->waitingPid = 0;
 	proc->sleep = 0;
@@ -300,7 +303,8 @@ int CreateProcessAt_in_kernel(createProcessParam * param)
 uint32_t LoadStackFrame(int(*process)(int,char**),int argc,char** argv, uint32_t bottom, void(*cleaner)())
 {
 	STACK_FRAME * frame = (STACK_FRAME*)(bottom - sizeof(STACK_FRAME));
-	frame->EBP = 0;
+	frame->EBP = 0; /*SE ROMPE TODO ACA */
+	printf("inside LoadStackFrame\n");
 	frame->EIP = (int)process;
 	frame->CS = 0x08;
 	frame->EFLAGS = 0;

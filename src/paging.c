@@ -371,6 +371,9 @@ void checkEsp(int esp) {
 		pdir_entry *dir = (pdir_entry *) P_DIR_START + pdir_offset;
 		ptable_entry *tab = (ptable_entry *) get_dir_entry_add(*dir);
 		ptable_entry *entry = tab + ((((uint32_t) addr) >> 12) & 0x3FF);
+		/*if (p->pid == 7) {
+			printf("p->pdir %d / pdir_offset : %d / table_offset: %d \n",p->pdir,pdir_offset,((((uint32_t) addr) >> 12) & 0x3FF));
+		}*/
 		flag = (*entry) & 512;
 		if (!flag) {
 			//printf("j= %d\n",j);

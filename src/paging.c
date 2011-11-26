@@ -99,6 +99,7 @@ static void unset_proc_ptable(uint32_t offset) {
 	printf("leaving unset_proc_ptable\n");
 	int j;
 	void *addr = (void *) ((offset + 64) * PTABLE_ENTRIES * PAGE_SIZE);
+	/*TODO*/
 	for (j = 0; j < PTABLE_ENTRIES; j++) {
 		remove_user_page(
 				(void*) ((uint32_t) addr + j * PAGE_SIZE), RWUNPRESENT,0);
@@ -158,6 +159,16 @@ static void set_proc_ptable(uint32_t offset) {
 
 	int j;
 
+
+	/*tiene que ir de atras para adelante TODO*/
+	/*void *addr = (void *) (( 1023 - offset) * PTABLE_ENTRIES * PAGE_SIZE);
+	create_user_page((void*) ((uint32_t) addr + 0 ), RWUPRESENT,1);
+
+	for (j = 1022; j < (PTABLE_ENTRIES - 64) ; j--) {
+		create_user_page(
+				(void*) ((uint32_t) addr + j * PAGE_SIZE), RWUNPRESENT,0);
+	}*/
+
 	void *addr = (void *) ((offset + 64) * PTABLE_ENTRIES * PAGE_SIZE);
 	create_user_page((void*) ((uint32_t) addr + 0 ), RWUPRESENT,1);
 
@@ -165,11 +176,11 @@ static void set_proc_ptable(uint32_t offset) {
 		create_user_page(
 				(void*) ((uint32_t) addr + j * PAGE_SIZE), RWUNPRESENT,0);
 	}
-
 }
 
 uint32_t get_stack_start(uint32_t pdir_offset) {
 
+	//return USER_VIRTUAL_MEM_START + pdir_offset * PAGE_SIZE * PTABLE_ENTRIES + PAGE_SIZE ;
 	return USER_VIRTUAL_MEM_START + pdir_offset * PAGE_SIZE * PTABLE_ENTRIES;
 }
 
@@ -333,16 +344,10 @@ void checkEsp(int esp) {
 	/*debugging*/
 	if (p->pid == 6) {
 		printf("last initialized page %d\n", j - 1);
-
 		printf("pdir %d\n", p->pdir);
-		//	printf("name: %s ,esp: %d, *currentEntry: %d, subtraction: %d \n",p->name,esp,*currentEntry,esp-(*currentEntry));
+		printf("name: %s ,esp: %d, *currentEntry: %d, subtraction: %d \n",p->name,esp,(*currentEntry),esp-(*currentEntry));
 	}
-	//printf("last initialized page %d\n",j-1);
 
-	/*debugging*/
-	/*if ( p->pid == 6 ){
-	 printf("name: %s ,esp: %d, *currentEntry: %d, subtraction: %d \n",p->name,esp,*currentEntry,esp-(*currentEntry));
-	 }*/
 
 	/*512 bytes of tolerance*/
 	if ((esp - (*currentEntry)) < 512) {

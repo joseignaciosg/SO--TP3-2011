@@ -281,7 +281,9 @@ int CreateProcessAt_in_kernel(createProcessParam * param)
 	proc->state = READY;
 	proc->tty = param->tty;
 	proc->stacksize =  1024;
+	printf("before get_stack_start in kernel\n");
 	proc->stackstart = get_stack_start(proc->pdir);
+	printf("after get_stack_start in kernel\n");
 	//proc->stackstart = (uint32_t)malloc(1024 * 4096);
 	proc->ESP = LoadStackFrame(param->process, param->argc, param->argv, (uint32_t)((char *)proc->stackstart + proc->stacksize), end_process);
 	proc->parent = CurrentPID;

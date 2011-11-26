@@ -58,6 +58,7 @@ void prueba2(int argc, char * argv[]) {
 	 while(i--)
 	 ;
 	 */
+	_Sti();
 
 	recursive(0);
 	return;

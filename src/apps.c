@@ -34,7 +34,7 @@ void prioridad(int argc, char * argv[]) {
 }
 
 void recursive(int a) {
-	int x,q,w/*,e,r,t,y,u,i,o,s,df,g,h,j,k,c,v,b,n,m,l*/;
+	int x,q,w,e,r,t,y,u,i,o,s,df,g,h,j,k,c,v,b,n,m,l;
 
 	while (a < 100000) {
 		x = 0;

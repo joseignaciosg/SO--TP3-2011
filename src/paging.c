@@ -330,11 +330,19 @@ void checkEsp(int esp) {
 		}
 		currentEntry = entry;	/*computes page start address to compare with esp*/
 	}
-	/*512 bytes of tolerance*/
+	//printf("last initialized page %d\n",j-1);
+
+	/*debugging*/
+	if ( p->pid == 6 ){
+		printf("name: %s ,esp: %d, *currentEntry: %d, subtraction: %d \n",p->name,esp,*currentEntry,(*currentEntry)+PAGE_SIZE-esp);
+	}
+
+
+		/*512 bytes of tolerance*/
 	if ( ((*currentEntry)+PAGE_SIZE-esp) < 512){
 		printf("name: %s ,esp: %d, *currentEntry: %d, subtraction: %d \n",p->name,esp,*currentEntry,(*currentEntry)+PAGE_SIZE-esp);
 		/*asigns a new page*/
-		create_user_page((void*) ((uint32_t) nextAddr), RWUNPRESENT,0);
+		create_user_page((void*) ((uint32_t) nextAddr), RWUPRESENT,1);
 	}else if(((*currentEntry)+PAGE_SIZE-esp)>PAGE_SIZE){
 		/*detach last page*/
 		//detach_user_page((void*) ((uint32_t) nextAddr), RWUNPRESENT,0);

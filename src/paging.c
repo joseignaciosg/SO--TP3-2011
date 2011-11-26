@@ -369,6 +369,7 @@ void checkEsp(int esp) {
 		pdir_entry *dir = (pdir_entry *) P_DIR_START + pdir_offset;
 		ptable_entry *tab = (ptable_entry *) get_dir_entry_add(*dir);
 		ptable_entry *entry = tab + ((((uint32_t) addr) >> 12) & 0x3FF);
+		flag = (*entry) & 512;
 		if (!flag) {
 			//printf("j= %d\n",j);
 			break;
@@ -377,20 +378,20 @@ void checkEsp(int esp) {
 	}
 
 	/*debugging*/
-	/*if (p->pid == 6) {
+	if (p->pid == 7) {
 		printf("last initialized page %d\n", j - 1);
 		printf("pdir %d\n", p->pdir);
-		printf("name: %s ,esp: %d, *currentEntry: %d, subtraction: %d \n",p->name,esp,(*currentEntry),esp-(*currentEntry));
-	}*/
+		printf("name: %s ,esp: %d, *currentEntry: %d, subtraction: %d \n",p->name,esp,(*currentEntry),(PAGE_SIZE - ( (*currentEntry) - esp) ));
+	}
 
 
-	/*512 bytes of tolerance*/
-	if ((esp - (*currentEntry)) < 512) {
+	/*1024 bytes of tolerance*/
+	if ((PAGE_SIZE - ( (*currentEntry) - esp) ) < 1024) {
 		printf("name: %s ,esp: %d, *currentEntry: %d, subtraction: %d \n",
-				p->name, esp, *currentEntry, esp - (*currentEntry));
+				p->name, esp, *currentEntry, (PAGE_SIZE - ( (*currentEntry) - esp) ));
 		/*asigns a new page*/
 		create_user_page((void*) ((uint32_t) nextAddr), RWUPRESENT, 1);
-	} else if (((*currentEntry) + PAGE_SIZE - esp) > PAGE_SIZE) {
+	} else if ( ( PAGE_SIZE - ( (*currentEntry) - esp) ) > PAGE_SIZE) {
 		/*detach last page*/
 		//detach_user_page((void*) ((uint32_t) nextAddr), RWUNPRESENT,0);
 	}

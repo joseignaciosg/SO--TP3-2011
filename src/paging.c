@@ -362,9 +362,11 @@ void checkEsp(int esp) {
 
 	void * addr = (void *) ((p->pdir + 64) * PTABLE_ENTRIES * PAGE_SIZE);
 	addr += (PTABLE_ENTRIES * PAGE_SIZE ) - 1;
+	nextAddr = addr;
 	for (j = 0;  ( j < PTABLE_ENTRIES ) && flag; j++) {
 		addr -= j * PAGE_SIZE;
 		nextAddr = addr;
+		//nextAddr -= PAGE_SIZE;
 		uint32_t pdir_offset = ((uint32_t) addr) >> 22;
 		pdir_entry *dir = (pdir_entry *) P_DIR_START + pdir_offset;
 		ptable_entry *tab = (ptable_entry *) get_dir_entry_add(*dir);
@@ -380,15 +382,17 @@ void checkEsp(int esp) {
 	/*debugging*/
 	if (p->pid == 7) {
 		printf("last initialized page %d\n", j - 1);
-		printf("pdir %d\n", p->pdir);
-		printf("name: %s ,esp: %d, *currentEntry: %d, subtraction: %d \n",p->name,esp,(*currentEntry),(PAGE_SIZE - ( (*currentEntry) - esp) ));
+		//printf("pdir %d\n", p->pdir);
+		printf("name: %s ,esp: %d, *currentEntry: %d, subtraction: %d \n",p->name,esp,(*currentEntry),( esp - (*currentEntry) ));
 	}
 
 
 	/*1024 bytes of tolerance*/
-	if ((PAGE_SIZE - ( (*currentEntry) - esp) ) < 1024) {
+	//if ((PAGE_SIZE - ( (*currentEntry) - esp) ) < 1024) {
+	if (( esp - (*currentEntry) )  < 1024) {
+		printf("LESS THAN one K\n");
 		printf("name: %s ,esp: %d, *currentEntry: %d, subtraction: %d \n",
-				p->name, esp, *currentEntry, (PAGE_SIZE - ( (*currentEntry) - esp) ));
+				p->name, esp, *currentEntry, ( esp - (*currentEntry) ));
 		/*asigns a new page*/
 		create_user_page((void*) ((uint32_t) nextAddr), RWUPRESENT, 1);
 	} else if ( ( PAGE_SIZE - ( (*currentEntry) - esp) ) > PAGE_SIZE) {

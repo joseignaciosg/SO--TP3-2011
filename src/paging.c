@@ -90,29 +90,29 @@ static void remove_user_page(void* addr, int perms, int flag) {
 
 static void unset_proc_ptable(uint32_t offset) {
 
-	printf("unset_proc_ptable pid == %d\n",offset);
+	printf("unset_proc_ptable pid == %d\n", offset);
 	pdir_entry *dir = (pdir_entry *) P_DIR_START;
 	uint32_t mem = USER_VIRTUAL_MEM_START + PAGE_SIZE * 1024 * offset;
 	dir += (mem >> 22); /*entrada del directorio de paginas que apunta a la tabla*/
-	ptable_entry * table = (ptable_entry *) (P_TABLE_USER_START + offset * PAGE_SIZE);
+	ptable_entry * table = (ptable_entry *) (P_TABLE_USER_START
+			+ offset * PAGE_SIZE);
 	printf("leaving unset_proc_ptable\n");
 	int j;
 	void *addr = (void *) ((offset + 64) * PTABLE_ENTRIES * PAGE_SIZE);
 	for (j = 0; j < PTABLE_ENTRIES; j++) {
-		remove_user_page((void*) ((uint32_t) addr + j * PAGE_SIZE), RWUNPRESENT,0);
+		remove_user_page(
+				(void*) ((uint32_t) addr + j * PAGE_SIZE), RWUNPRESENT,0);
 	}
 	*dir = get_dir_entry((uint32_t) table, RWUNPRESENT);
 
-
 }
-
 
 void clear_proc_ptable(uint32_t pid) {
 
-	int i ;
-	for (i = 0; i < MAX_PROC; i++){
-		if (dirs[i] == pid){
-			printf("dirs[i] == pid == %d\n",pid);
+	int i;
+	for (i = 0; i < MAX_PROC; i++) {
+		if (dirs[i] == pid) {
+			printf("dirs[i] == pid == %d\n", pid);
 			/*unset_proc_ptable(i);TODO si esto se descomenta no anda*/
 			dirs[i] = -1;
 		}
@@ -179,8 +179,9 @@ uint32_t create_proc_ptable(void) {
 	for (i = 0; i < MAX_PROC; i++) {
 		if (dirs[i] == -1) {
 			set_proc_ptable(i);
-			dirs[i] = nextPID-1 ;
-			printf("create_proc_ptable dirs i = %d , pid = %d\n",i, nextPID-1);
+			dirs[i] = nextPID - 1;
+			printf("create_proc_ptable dirs i = %d , pid = %d\n", i,
+					nextPID - 1);
 
 			return i;
 		}
@@ -226,7 +227,7 @@ static void create_kernel_ptable(void* addr) {
 void initializePaging(void) {
 
 	int i, j, k;
-	for ( k=0; k<MAX_PROC; k++){
+	for (k = 0; k < MAX_PROC; k++) {
 		dirs[k] = -1;
 	}
 
@@ -309,13 +310,12 @@ void checkEsp(int esp) {
 	PROCESS * p = GetProcessByPID(CurrentPID);
 	int j, flag = 1;
 
-
-	ptable_entry *currentEntry,nextEntry;
+	ptable_entry * currentEntry;
 	void * nextAddr; /*for next page to initialize*/
 
 	/*grabs index of last initialized page*/
 	void * addr = (void *) ((p->pdir + 64) * PTABLE_ENTRIES * PAGE_SIZE);
-	for (j = 0; j < PTABLE_ENTRIES ; j++) {
+	for (j = 0; j < PTABLE_ENTRIES; j++) {
 		addr += j * PAGE_SIZE;
 		nextAddr = addr;
 		uint32_t pdir_offset = ((uint32_t) addr) >> 22;
@@ -323,31 +323,37 @@ void checkEsp(int esp) {
 		ptable_entry *tab = (ptable_entry *) get_dir_entry_add(*dir);
 		ptable_entry *entry = tab + ((((uint32_t) addr) >> 12) & 0x3FF);
 		flag = (*entry) & 512; /*if bit 8 == 0, breaks*/
-		//nextEntry = entry;
-		if ( !flag ){
+		if (!flag) {
 			//printf("j= %d\n",j);
 			break;
 		}
-		currentEntry = entry;	/*computes page start address to compare with esp*/
+		currentEntry = entry; /*computes page start address to compare with esp*/
+	}
+
+	/*debugging*/
+	if (p->pid == 6) {
+		printf("last initialized page %d\n", j - 1);
+
+		printf("pdir %d\n", p->pdir);
+		//	printf("name: %s ,esp: %d, *currentEntry: %d, subtraction: %d \n",p->name,esp,*currentEntry,esp-(*currentEntry));
 	}
 	//printf("last initialized page %d\n",j-1);
 
 	/*debugging*/
-	if ( p->pid == 6 ){
-		printf("name: %s ,esp: %d, *currentEntry: %d, subtraction: %d \n",p->name,esp,*currentEntry,(*currentEntry)+PAGE_SIZE-esp);
-	}
+	/*if ( p->pid == 6 ){
+	 printf("name: %s ,esp: %d, *currentEntry: %d, subtraction: %d \n",p->name,esp,*currentEntry,esp-(*currentEntry));
+	 }*/
 
-
-		/*512 bytes of tolerance*/
-	if ( ((*currentEntry)+PAGE_SIZE-esp) < 512){
-		printf("name: %s ,esp: %d, *currentEntry: %d, subtraction: %d \n",p->name,esp,*currentEntry,(*currentEntry)+PAGE_SIZE-esp);
+	/*512 bytes of tolerance*/
+	if ((esp - (*currentEntry)) < 512) {
+		printf("name: %s ,esp: %d, *currentEntry: %d, subtraction: %d \n",
+				p->name, esp, *currentEntry, esp - (*currentEntry));
 		/*asigns a new page*/
-		create_user_page((void*) ((uint32_t) nextAddr), RWUPRESENT,1);
-	}else if(((*currentEntry)+PAGE_SIZE-esp)>PAGE_SIZE){
+		create_user_page((void*) ((uint32_t) nextAddr), RWUPRESENT, 1);
+	} else if (((*currentEntry) + PAGE_SIZE - esp) > PAGE_SIZE) {
 		/*detach last page*/
 		//detach_user_page((void*) ((uint32_t) nextAddr), RWUNPRESENT,0);
 	}
-
 
 }
 

@@ -413,9 +413,9 @@ void end_process(void)
 		if(last100[i] == proc->pid)
 			last100[i] = -1;
 
-	clear_proc_ptable(proc->pid);
-
 	_Sti();
+	printf("calling clear_proc_ptable proc pid = %d\n",proc->pid);
+	clear_proc_ptable(proc->pid); /*error*/
 
 	return ;
 }
@@ -472,6 +472,7 @@ void kill_in_kernel(int pid)
 		if(last100[i] == proc->pid)
 			last100[i] = -1;
 
+	printf("calling clear_proc_ptable\n");
 	clear_proc_ptable(pid);
 
 	_Sti();

@@ -97,7 +97,7 @@ static void takedown_user_page(void* addr, int perms, int flag) {
 
 static void unset_proc_ptable(uint32_t offset) {
 
-	printf("unset_proc_ptable offset == %d\n", offset);
+	//printf("unset_proc_ptable offset == %d\n", offset);
 
 	pdir_entry *dir = (pdir_entry *) P_DIR_START;
 
@@ -117,7 +117,6 @@ static void unset_proc_ptable(uint32_t offset) {
 
 	void *addr = (void *) ((offset + 64) * PTABLE_ENTRIES * PAGE_SIZE);
 	addr += (PTABLE_ENTRIES * PAGE_SIZE) - 1;
-	printf("here\n");
 
 	for (j = 0; j < PTABLE_ENTRIES; j++) {
 		takedown_user_page(
@@ -131,12 +130,11 @@ void clear_proc_ptable(uint32_t pid) {
 	int i;
 	for (i = 0; i < MAX_PROC; i++) {
 		if (dirs[i] == pid) {
-			printf("dirs[i] == pid == %d\n", pid);
-			unset_proc_ptable(i); //TODO si esto se descomenta no anda
+			//printf("dirs[i] == pid == %d\n", pid);
+			unset_proc_ptable(i);
 			dirs[i] = -1;
 		}
 	}
-	printf("leaving clear_proc_ptable\n");
 	/*also the table and the pages assigned to the process must by hopped off*/
 
 }
@@ -179,7 +177,6 @@ static void set_proc_ptable(uint32_t offset) {
 
 	void *addr = (void *) ((offset + 64) * PTABLE_ENTRIES * PAGE_SIZE);
 	addr += (PTABLE_ENTRIES * PAGE_SIZE) - 1;
-	printf("here\n");
 	create_user_page((void*) ((uint32_t) addr - 0 ), RWUPRESENT,1);
 
 	for (j = 1; j < PTABLE_ENTRIES; j++) {
@@ -384,6 +381,7 @@ void checkEsp(int esp) {
 		printf(
 				"\n&&&&&&&&&&&&&&&&&&&&  STACK 2 BIG &&&&&&&&&&&&&&&&&&&&&&&&&\n");
 		printf("subtraction: %d", esp - (*currentEntry));
+		takedown_user_page((void*) ((uint32_t) nextAddr), RWUPRESENT, 1);
 		/*detach last page*/
 		//detach_user_page((void*) ((uint32_t) nextAddr), RWUNPRESENT,0);
 	}

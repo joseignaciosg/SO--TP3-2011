@@ -36,7 +36,6 @@ static ptable_entry get_dir_entry(uint32_t address, uint32_t perms);
 static ptable_entry get_table_entry(uint32_t address, uint32_t perms, int flag);
 inline static uint32_t get_dir_entry_add(pdir_entry entry);
 static void set_proc_ptable(uint32_t offset);
-void page_fault_handler(uint32_t errcode, uint32_t address);
 void page_fault_handler_wrapper(struct int_params* params);
 
 static uint32_t dirs[MAX_PROC];
@@ -57,6 +56,13 @@ static ptable_entry get_table_entry(uint32_t address, uint32_t perms, int flag) 
 		//printf("\ntable entry %d\n", (ret >> 9) & 0x1);/*print bit 8*/
 		//printf("ret: %d\n", ret);
 	}
+	return ret;
+}
+
+static ptable_entry down_table_entry(uint32_t address, uint32_t perms, int flag) {
+
+	pdir_entry ret = address & 0xFFFFFFF1;
+	ret |= perms;
 	return ret;
 }
 
@@ -85,20 +91,20 @@ static void takedown_user_page(void* addr, int perms, int flag) {
 	ptable_entry *tab = (ptable_entry *) get_dir_entry_add(*dir); /*se queda con los 20 bits mas significativos*/
 	ptable_entry *entry = tab + ((((uint32_t) addr) >> 12) & 0x3FF); /*se queda con los 10 bits menos significativos
 	 de addr*/
-	*entry = get_table_entry((uint32_t) addr, perms, flag); /*setea el page frame address de la pagina, poniendola
+	*entry = down_table_entry((uint32_t) addr, perms, flag); /*setea el page frame address de la pagina, poniendola
 	 como presente*/
 }
 
 static void unset_proc_ptable(uint32_t offset) {
 
-	printf("unset_proc_ptable pid == %d\n", offset);
+	printf("unset_proc_ptable offset == %d\n", offset);
 
 	pdir_entry *dir = (pdir_entry *) P_DIR_START;
 
 	//Get the virtual address for the process
 	uint32_t mem = USER_VIRTUAL_MEM_START + PAGE_SIZE * 1024 * offset;
 
-	dir += (mem >> 22); /*entrada del directorio de paginas que apunta a la tabla*/
+	dir += (mem >> 22); //entrada del directorio de paginas que apunta a la tabla
 	//Adress of the start of the process' page table
 
 	ptable_entry * table = (ptable_entry *) (P_TABLE_USER_START
@@ -126,7 +132,7 @@ void clear_proc_ptable(uint32_t pid) {
 	for (i = 0; i < MAX_PROC; i++) {
 		if (dirs[i] == pid) {
 			printf("dirs[i] == pid == %d\n", pid);
-			//unset_proc_ptable(i);//TODO si esto se descomenta no anda
+			unset_proc_ptable(i); //TODO si esto se descomenta no anda
 			dirs[i] = -1;
 		}
 	}

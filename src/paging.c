@@ -394,6 +394,7 @@ void checkEsp(int esp) {
 	/*1024 bytes of tolerance*/
 	//if ((PAGE_SIZE - ( (*currentEntry) - esp) ) < 1024) {
 	if (( esp - (*currentEntry) )  < 1024 ) {
+		printf("\nlast initialized page %d\n", j - 1);
 		printf("LESS THAN one K\n");
 		printf("name: %s ,esp: %d, *currentEntry: %d, subtraction: %d \n",
 				p->name, esp, *currentEntry, ( esp - (*currentEntry) ));

@@ -379,18 +379,16 @@ void checkEsp(int esp) {
 
 	/*1024 bytes of tolerance*/
 	if ((esp - (*currentEntry)) < 1024) {
-		printf(
-				"\n&&&&&&&&&&&&&&&&&&&& LESS THAN one K &&&&&&&&&&&&&&&&&&&&&&&&&\n");
+		printf("\n&&&&&&&&&&&&&&&&&&&& LESS THAN one K &&&&&&&&&&&&&&&&&&&&&&&&&\n");
 		printf("\nlast initialized page %d\n", j - 1);
 		printf("name: %s ,esp: %d, *currentEntry: %d, subtraction: %d \n",
 				p->name, esp, *currentEntry, (esp - (*currentEntry) ));
 		/*asigns a new page*/
 		create_user_page((void*) ((uint32_t) nextAddr), RWUPRESENT, 1);
 	} else if (((esp - (*currentEntry)) > PAGE_SIZE + 2048) && p->pid) {
-		printf(
-				"\n&&&&&&&&&&&&&&&&&&&&  STACK 2 BIG &&&&&&&&&&&&&&&&&&&&&&&&&\n");
+		printf("\n&&&&&&&&&&&&&&&&&&&&  STACK 2 BIG &&&&&&&&&&&&&&&&&&&&&&&&&\n");
 		printf("name: %s ,esp: %d, *currentEntry: %d, subtraction: %d \n",
-					p->name, esp, *currentEntry, (esp - (*currentEntry) ));
+				p->name, esp, *currentEntry, (esp - (*currentEntry) ));
 		takedown_user_page((void*) ((uint32_t) nextAddr), RWUPRESENT, 0);
 		/*detach last page*/
 		//detach_user_page((void*) ((uint32_t) nextAddr), RWUNPRESENT,0);

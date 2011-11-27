@@ -137,8 +137,7 @@ void clear_proc_ptable(uint32_t pid) {
 		if (dirs[i] == pid) {
 			//printf("dirs[i] == pid == %d\n", pid);
 			unset_proc_ptable(i);
-			//dirs[i] = -1;
-			dirs[i] = 100000;
+			dirs[i] = -1;
 		}
 	}
 	/*also the table and the pages assigned to the process must by hopped off*/

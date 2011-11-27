@@ -36,11 +36,13 @@
 
 #define RWUPRESENT 7
 
-#define MAX_PROC 128
+#define MAX_PROC 64
 
 #define RWUNPRESENT 6
 
 #define PAGES_ON_MEM 12
+
+#define MAX_TABLES 128
 
 #define USER_PTABLE_OFFSET ((P_TABLE_USER_START - P_TABLE_START)/4)
 

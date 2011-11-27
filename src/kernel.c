@@ -303,7 +303,7 @@ int CreateProcessAt_in_kernel(createProcessParam * param)
 uint32_t LoadStackFrame(int(*process)(int,char**),int argc,char** argv, uint32_t bottom, void(*cleaner)())
 {
 	STACK_FRAME * frame = (STACK_FRAME*)(bottom - sizeof(STACK_FRAME));
-	frame->EBP = 0; /*SE ROMPE TODO ACA */
+	frame->EBP = 0; /*SE ROMPIA TODO ACA */
 	printf("inside LoadStackFrame\n");
 	frame->EIP = (int)process;
 	frame->CS = 0x08;

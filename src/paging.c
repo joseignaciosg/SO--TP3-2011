@@ -78,10 +78,15 @@ inline static uint32_t get_table_entry_add(ptable_entry entry) {
 
 void page_fault_handler_wrapper(struct int_params* params) {
 
+	PROCESS * p = GetProcessByPID(CurrentPID);
+	printf("\n process in page_fault : %s \n", p->name);
 	uint32_t address = 0;
 	__asm__ volatile("MOVL 	%%CR2, %0" : "=r" (address) : );
 	printf("err_code:%d TABLE:%d PAGE:%d\n", params->err_code & 0xF,
 			address >> 22, (address >> 12) & 1023);
+
+	/*kill the process on this point*/
+	//kill(CurrentPID);
 }
 
 static void takedown_user_page(void* addr, int perms, int flag) {
@@ -189,6 +194,9 @@ static void set_proc_ptable(uint32_t offset) {
 }
 
 uint32_t get_stack_start(uint32_t pdir_offset) {
+	if (!CurrentPID){
+		printf("idle start: ");
+	}
 
 	return USER_VIRTUAL_MEM_START + pdir_offset * PAGE_SIZE * PTABLE_ENTRIES
 			+ ((PAGE_SIZE * PTABLE_ENTRIES) - 1);
@@ -381,7 +389,7 @@ void checkEsp(int esp) {
 		printf(
 				"\n&&&&&&&&&&&&&&&&&&&&  STACK 2 BIG &&&&&&&&&&&&&&&&&&&&&&&&&\n");
 		printf("subtraction: %d", esp - (*currentEntry));
-		takedown_user_page((void*) ((uint32_t) nextAddr), RWUPRESENT, 1);
+		takedown_user_page((void*) ((uint32_t) nextAddr), RWUPRESENT, 0);
 		/*detach last page*/
 		//detach_user_page((void*) ((uint32_t) nextAddr), RWUNPRESENT,0);
 	}

@@ -271,22 +271,17 @@ PROCESS * GetProcessByPID(int pid)
 int CreateProcessAt_in_kernel(createProcessParam * param)
 {
 	PROCESS * proc;
-	printf("inside CreateProcessAt_in_kernel\n");
 	proc = malloc(sizeof(PROCESS));
 	proc->name = (char*)malloc(15);
 	proc->pid = nextPID++;
-	printf("before create_proc_ptable()\n ");
 	proc->pdir = create_proc_ptable();
-	printf("after create_proc_ptable()\n ");
 	proc->foreground = param->isFront;
 	proc->priority = param->priority;
 	memcpy(proc->name, param->name,str_len(param->name) + 1);
 	proc->state = READY;
 	proc->tty = param->tty;
 	proc->stacksize =  1024;
-	printf("before get_stack_start in kernel\n");
 	proc->stackstart = get_stack_start(proc->pdir);
-	printf("after get_stack_start in kernel\n");
 	//proc->stackstart = (uint32_t)malloc(1024 * 4096);
 	proc->ESP = LoadStackFrame(param->process, param->argc, param->argv, (uint32_t)((char *)proc->stackstart /*+ proc->stacksize*/), end_process);
 	proc->parent = CurrentPID;
@@ -294,7 +289,7 @@ int CreateProcessAt_in_kernel(createProcessParam * param)
 	proc->sleep = 0;
 	proc->acum = param->priority + 1;
 	set_Process_ready(proc);
-	printf("process created\n");
+	//printf("process created\n");
 
 	return proc->pid;
 }
@@ -303,8 +298,8 @@ int CreateProcessAt_in_kernel(createProcessParam * param)
 uint32_t LoadStackFrame(int(*process)(int,char**),int argc,char** argv, uint32_t bottom, void(*cleaner)())
 {
 	STACK_FRAME * frame = (STACK_FRAME*)(bottom - sizeof(STACK_FRAME));
-	frame->EBP = 0; /*SE ROMPIA TODO ACA */
-	printf("inside LoadStackFrame\n");
+	frame->EBP = 0;
+	//printf("inside LoadStackFrame\n");
 	frame->EIP = (int)process;
 	frame->CS = 0x08;
 	frame->EFLAGS = 0;
@@ -420,7 +415,6 @@ void end_process(void)
 			last100[i] = -1;
 
 	_Sti();
-	printf("calling clear_proc_ptable proc pid = %d\n",proc->pid);
 	clear_proc_ptable(proc->pid); /*error*/
 
 	return ;
@@ -478,7 +472,6 @@ void kill_in_kernel(int pid)
 		if(last100[i] == proc->pid)
 			last100[i] = -1;
 
-	printf("calling clear_proc_ptable\n");
 	clear_proc_ptable(pid);
 
 	_Sti();
@@ -748,9 +741,13 @@ void logUser(void)
 			buffcopy[j] = 0;
 	}
 	terminals[0].PID = CreateProcessAt("Shell0", (int(*)(int, char**))shell, 0, 0, (char**)0, PAGE_SIZE, 2, 1);
+	//printf("terminals[0].PID \n");
 	terminals[1].PID = CreateProcessAt("Shell1", (int(*)(int, char**))shell, 1, 0, (char**)0, PAGE_SIZE, 2, 1);
+	//printf("terminals[1].PID \n");
 	terminals[2].PID = CreateProcessAt("Shell2", (int(*)(int, char**))shell, 2, 0, (char**)0, PAGE_SIZE, 2, 1);
+	//printf("terminals[2].PID \n");
 	terminals[3].PID = CreateProcessAt("Shell3", (int(*)(int, char**))shell, 3, 0, (char**)0, PAGE_SIZE, 2, 1);
+	//printf("terminals[3].PID \n");
 	do_close(fd);
 	_Sti();
 	return;

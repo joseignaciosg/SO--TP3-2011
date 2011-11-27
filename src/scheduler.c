@@ -142,8 +142,9 @@ void SetupScheduler(void)
 	idle.state = READY;
 	idle.tty = 0;
 	idle.stacksize = 4096;
+	printf("idle.pdir : %d\n", idle.pdir);
 	idle.stackstart = get_stack_start(idle.pdir);
-	//printf("idle.stackstart : %d\n", idle.stackstart);
+	printf("idle.stackstart : %d\n", idle.stackstart);
 	idle.ESP = LoadStackFrame(Idle, 0, 0, (uint32_t)((char *)idle.stackstart /*+ idle.stacksize*/), end_process);
 	printf("idle process created\n");
 	idle.parent = -1;

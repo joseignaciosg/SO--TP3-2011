@@ -29,7 +29,7 @@ struct int_params {
 	uint32_t useresp;
 	uint32_t ss;
 };
-
+void kill(int pid);
 static void create_kernel_ptable(void * addr);
 static void create_kernel_page(void * addr);
 static ptable_entry get_dir_entry(uint32_t address, uint32_t perms);
@@ -82,11 +82,11 @@ void page_fault_handler_wrapper(struct int_params* params) {
 	printf("\n process in page_fault : %s \n", p->name);
 	uint32_t address = 0;
 	__asm__ volatile("MOVL 	%%CR2, %0" : "=r" (address) : );
-	printf("err_code:%d TABLE:%d PAGE:%d\n", params->err_code & 0xF,
+	printf("PAGE FAULT : err_code:%d TABLE:%d PAGE:%d\n", params->err_code & 0xF,
 			address >> 22, (address >> 12) & 1023);
 
 	/*kill the process on this point*/
-	//kill(CurrentPID);
+	kill(CurrentPID);
 }
 
 static void takedown_user_page(void* addr, int perms, int flag) {
@@ -137,7 +137,8 @@ void clear_proc_ptable(uint32_t pid) {
 		if (dirs[i] == pid) {
 			//printf("dirs[i] == pid == %d\n", pid);
 			unset_proc_ptable(i);
-			dirs[i] = -1;
+			//dirs[i] = -1;
+			dirs[i] = 100000;
 		}
 	}
 	/*also the table and the pages assigned to the process must by hopped off*/
@@ -194,9 +195,10 @@ static void set_proc_ptable(uint32_t offset) {
 }
 
 uint32_t get_stack_start(uint32_t pdir_offset) {
-	if (!CurrentPID){
-		printf("idle start: ");
-	}
+	/*if (!CurrentPID){
+		printf("IDLE start: %d \n", USER_VIRTUAL_MEM_START + pdir_offset * PAGE_SIZE * PTABLE_ENTRIES
+				+ ((PAGE_SIZE * PTABLE_ENTRIES) - 1));
+	}*/
 
 	return USER_VIRTUAL_MEM_START + pdir_offset * PAGE_SIZE * PTABLE_ENTRIES
 			+ ((PAGE_SIZE * PTABLE_ENTRIES) - 1);
@@ -209,8 +211,8 @@ uint32_t create_proc_ptable(void) {
 		if (dirs[i] == -1) {
 			set_proc_ptable(i);
 			dirs[i] = nextPID - 1;
-			//printf("create_proc_ptable dirs i = %d , pid = %d\n", i,
-			//		nextPID - 1);
+			printf("create_proc_ptable dirs i = %d , pid = %d\n", i,
+					nextPID - 1);
 
 			//printf("leaving create_proc_ptable\n");
 			return i;
@@ -388,7 +390,8 @@ void checkEsp(int esp) {
 	} else if (((esp - (*currentEntry)) > PAGE_SIZE + 2048) && p->pid) {
 		printf(
 				"\n&&&&&&&&&&&&&&&&&&&&  STACK 2 BIG &&&&&&&&&&&&&&&&&&&&&&&&&\n");
-		printf("subtraction: %d", esp - (*currentEntry));
+		printf("name: %s ,esp: %d, *currentEntry: %d, subtraction: %d \n",
+					p->name, esp, *currentEntry, (esp - (*currentEntry) ));
 		takedown_user_page((void*) ((uint32_t) nextAddr), RWUPRESENT, 0);
 		/*detach last page*/
 		//detach_user_page((void*) ((uint32_t) nextAddr), RWUNPRESENT,0);

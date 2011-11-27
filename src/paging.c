@@ -384,11 +384,11 @@ void checkEsp(int esp) {
 	}
 
 	/*debugging*/
-	if (p->pid == 7) {
+	/*if (p->pid == 7) {
 		printf("last initialized page %d\n", j - 1);
 		//printf("pdir %d\n", p->pdir);
 		printf("name: %s ,esp: %d, *currentEntry: %d, subtraction: %d \n",p->name,esp,(*currentEntry),( esp - (*currentEntry) ));
-	}
+	}*/
 
 
 	/*1024 bytes of tolerance*/
@@ -400,7 +400,9 @@ void checkEsp(int esp) {
 				p->name, esp, *currentEntry, ( esp - (*currentEntry) ));
 		/*asigns a new page*/
 		create_user_page((void*) ((uint32_t) nextAddr), RWUPRESENT, 1);
-	} else if ( ( PAGE_SIZE - ( (*currentEntry) - esp) ) > PAGE_SIZE) {
+	} else if (  (( esp - (*currentEntry) ) > PAGE_SIZE + 2048)   && p->pid ) {
+		printf("\n&&&&&&&&&&&&&&&&&&&&  STACK 2 BIG &&&&&&&&&&&&&&&&&&&&&&&&&\n");
+		printf("subtraction: %d",esp - (*currentEntry) );
 		/*detach last page*/
 		//detach_user_page((void*) ((uint32_t) nextAddr), RWUNPRESENT,0);
 	}

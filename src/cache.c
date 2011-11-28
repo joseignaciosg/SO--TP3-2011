@@ -3,9 +3,11 @@
 #include<time.h>
 #include<string.h>
 
+
+
 #define IS_DIRTY 1
 #define NO_DIRTY 0
-#define CACHE_BLOCKS 128
+#define CACHE_BLOCKS 128 /*2 Mb de cache?*/
 #define TRUE 1
 #define OK 1;
 #define ERROR -1;
@@ -38,7 +40,9 @@ int hipotetical_read(int block, char * buffer, int size);
 
 blockVector cache_array[CACHE_BLOCKS];
 int cache_freeblocks = CACHE_BLOCKS;
-int dirtys = 0;
+int dirties = 0;
+
+
 
 //Busca un index en el array correspondiente al numero de bloque.
 int cache_findblock(int num){
@@ -50,7 +54,7 @@ int cache_findblock(int num){
 			return i;
 		} 
 	}
-	
+
 	return -1;
 }
 
@@ -196,7 +200,7 @@ int hipotetical_read(int block, char * buffer, int size){
 	int quantblocks = (int)(size/512) + 1;
 	//Si la cantidad de bloques supera a la de la cache entonces leo directamente de disco.	
 	if( quantblocks > CACHE_BLOCKS ){
-		return; //disk_read(block,buffer,size);
+		return -1; //disk_read(block,buffer,size);
 	}
 	//Si no estan todos los bloques juntos, entonces leo e inserto en al cache.
 	if ( cache_searchblockpackage(block,quantblocks) == -1){
@@ -220,7 +224,7 @@ int hipotetical_write(int block, char * buffer, int size){
 
 	int quantblocks = (int)(size/512) + 1;
 	if( quantblocks > CACHE_BLOCKS ){
-		return; //disk_write(block,buffer,size);
+		return -1; //disk_write(block,buffer,size);
 	}
 	//Si no estan todos los bloques, entonces leo y meto en la cache.
 	if ( cache_searchblockpackage(block,quantblocks) == -1){
@@ -245,7 +249,7 @@ int cache_write(int block, char * data, int size){
 	for( i = 0; i < ((int)(size/512)+1); i++){
 		memcpy(cache_array[init_block+i].data,data+(512*i),512);
 		cache_array[init_block+i].dirty = 1;//TRUE
-		dirtys++;
+		dirties++;
 	}
 	return size;
 }
@@ -273,11 +277,11 @@ int flushall(){
 		if( cache_array[i].dirty == 1){
 			//disk_write(cache_array[i].num_block, cache_array[i].data,size);
 			cache_array[i].dirty = 0;
-			dirtys--;
+			dirties--;
 		}
 	}
 
-	if( dirtys != 0){
+	if( dirties != 0){
 		return ERROR;
 	}
 
@@ -301,6 +305,7 @@ int cache_searchblockpackage(int block, int quantblocks){
 	return flag;
 }
 
+/*
 int main(void) {
 	int i = 0;
 	time_t start, stop;
@@ -338,7 +343,7 @@ int main(void) {
 	printf("\n");
 	return 0;
 }
-
+*/
 
 //Mergesort.
 void mergesort(blockVector * a, int low, int high) {

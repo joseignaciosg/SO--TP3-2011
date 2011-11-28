@@ -33,7 +33,11 @@ void init_filesystem( char * filesystem_name, masterBootRecord * mbr){
 	
 	/*mbr sector*/
 	int fd;
+
+
 	user * users = calloc(sizeof(user), 100);
+
+
 	memcpy(users[0].name, "chinux", str_len("chinux"));
 	memcpy(users[0].password, "chinux", str_len("chinux"));
 	users[0].usrID = 1;
@@ -41,6 +45,7 @@ void init_filesystem( char * filesystem_name, masterBootRecord * mbr){
 	mbr->existFS = 1;
 
 	write_disk(0,MBRSECTOR,mbr,BLOCK_SIZE,0);//BLOCK_SIZE
+
 	
 	/* superBlock sector */
 	superblock->name = "Chinux";
@@ -50,20 +55,27 @@ void init_filesystem( char * filesystem_name, masterBootRecord * mbr){
 	superblock->root = NULL; 
 	write_disk(0,SUPERBLOCKSECTOR,superblock,BLOCK_SIZE,0);
 
+
 	/* bitmap Sectors */
 	init_bitmap();
 	
+
 	/* inodemap Sectors */
  	init_inodemap();
+
+
 
 	/* Root node & current node */
 	
 	init_root();
+
 	write_disk(0,1,superblock,BLOCK_SIZE,0);
+
 	current = superblock->root;
 	
 	makeDir("users");
 	makeDir("etc");
+
 
 	
 	fd = do_creat("usersfile", 777);
@@ -303,6 +315,7 @@ void free_used_blocks(int init_bit, int quantity, int mode){
 iNode * fs_creat_inode(int identifier, int mode, int size, iNode * current){
 	
 	iNode * ret = (iNode *)malloc(sizeof(iNode));
+	//printf("Inode: %d\n",sizeof(iNode));
 	fs_init_inode(ret,identifier,mode,size,current);
 	return ret;
 }

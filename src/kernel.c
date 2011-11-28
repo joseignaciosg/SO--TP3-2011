@@ -223,10 +223,12 @@ kmain()
 	initializePaging();
 	_StartCR3();
 	SetupScheduler();
+	printf("after SetupScheduler\n");
 
 	for(h = 0; h < 200; h++){
 		write_disk(0,h,buffer,BLOCK_SIZE,0);
 	}
+
 	fd_table = (filedescriptor *)calloc(100,1);
 	masterBootRecord * mbr = (masterBootRecord *)malloc(512);
 	superblock = (masterBlock*)malloc(512);		
@@ -241,10 +243,13 @@ kmain()
 		load_filesystem();
 	}
 	
+
+
 	ready = NULL;
 	for(i = 0; i < 4; i++)
 		startTerminal(i);
-	
+
+	free(mbr);
 	logPID = CreateProcessAt("Login", (int(*)(int, char**))logUser, 0, 0, (char**)0, PAGE_SIZE, 4, 1);
 	_Sti();
 
@@ -289,6 +294,7 @@ int CreateProcessAt_in_kernel(createProcessParam * param)
 	proc->sleep = 0;
 	proc->acum = param->priority + 1;
 	set_Process_ready(proc);
+	printf("inside CreateProcessAt_in_kernel, pid: %d \n",proc->pid) ;
 	//printf("process created\n");
 
 	return proc->pid;
@@ -376,7 +382,8 @@ int Idle(int argc, char* argv[])
 {
 	_Sti();
 	while(1)
-	;
+		;
+	return 0;
 }
 
 void end_process(void)
@@ -686,13 +693,15 @@ void sleep(int secs)
 
 void logUser(void)
 {
+	printf("inside logUser\n");
 	int i, fd, usrNotFound, j;
 	user * usr;
 	current = superblock->root;
 	currentUsr.group = ADMIN;
-
 	fd = do_open("usersfile", 777, 777);
+	printf("inside logUser sizeof(user): %d\n ",sizeof(user));
 	usr = malloc(sizeof(user) * 100);
+	printf("user addr %d\n", usr);
 	do_read(fd, (char *)usr, sizeof(user) * 100);
 
 	while(!usrLoged)
@@ -703,6 +712,7 @@ void logUser(void)
 		usrName = 1;
 		block_process(CurrentPID);
 		scanf("%s", buffcopy);
+		//printf("\n usr[i].name %s\n",usr[0].name);
 		for(i = 0; i < 100 && usr[i].usrID != 0 && usrNotFound; i++)
 		{
 			if(strcmp(usr[i].name, buffcopy))
@@ -750,6 +760,8 @@ void logUser(void)
 	terminals[3].PID = CreateProcessAt("Shell3", (int(*)(int, char**))shell, 3, 0, (char**)0, PAGE_SIZE, 2, 1);
 	//printf("terminals[3].PID \n");
 	do_close(fd);
+
+	free(usr);
 	_Sti();
 	return;
 }
@@ -761,7 +773,10 @@ void logout(int argc, char * argv[])
 	usrLoged = 0;
 	for(i = 0; i < 4; i++)
 		kill(terminals[i].PID);
+	printf("inside logout , after kill terminals\n");
 	logPID = CreateProcessAt("logUsr", (int(*)(int, char**))logUser, currentProcessTTY, 0, (char**)0, PAGE_SIZE, 4, 1);
+	printf("inside logout , after CreateProcessAt logUser\n");
+
 	_Sti();
 }
 
@@ -805,5 +820,6 @@ void createusr(char * name, char * password, char * group)
 
 	current = aux;
 
+	free(usr);
 	return;	
 }

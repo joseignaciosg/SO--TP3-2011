@@ -275,6 +275,7 @@ parseBuffer() {
 			cleared_screen = TRUE;
 		}
 		currentProcessTTY = aux;
+		printf("logging out\n");
 		logoutPID = pid = CreateProcessAt("logout", (int(*)(int, char**))logout, currentProcessTTY, 0, (char**)0, 0x400, 4, isFront);
 	}else if(strcmp("top", buffcopy)){
 		pid = CreateProcessAt("Top", (int(*)(int, char**))top, currentProcessTTY, 0, (char**)0, 0x400, 2, isFront);

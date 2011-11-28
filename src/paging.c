@@ -38,7 +38,7 @@ inline static uint32_t get_dir_entry_add(pdir_entry entry);
 static void set_proc_ptable(uint32_t offset);
 void page_fault_handler_wrapper(struct int_params* params);
 
-static uint32_t dirs[MAX_PROC];
+static uint32_t user_tables[MAX_PROC];
 
 static pdir_entry get_dir_entry(uint32_t address, uint32_t perms) {
 
@@ -78,14 +78,18 @@ inline static uint32_t get_table_entry_add(ptable_entry entry) {
 
 void page_fault_handler_wrapper(struct int_params* params) {
 
-	PROCESS * p = GetProcessByPID(CurrentPID);
-	printf("\n process in page_fault : %s \n", p->name);
+	//PROCESS * p = GetProcessByPID(CurrentPID);
+	//printf("\n process in page_fault : %s - p->pdir %d \n", p->name, p->pdir);
 	uint32_t address = 0;
 	__asm__ volatile("MOVL 	%%CR2, %0" : "=r" (address) : );
+	if((int)address < 0){
+		return;
+	}
+	printf("address: %d\n",address);
 	printf("PAGE FAULT : err_code:%d TABLE:%d PAGE:%d\n", params->err_code & 0xF,
 			address >> 22, (address >> 12) & 1023);
 
-	/*kill the process on this point*/
+	/*kill the process at this point*/
 	kill(CurrentPID);
 }
 
@@ -134,10 +138,10 @@ void clear_proc_ptable(uint32_t pid) {
 
 	int i;
 	for (i = 0; i < MAX_PROC; i++) {
-		if (dirs[i] == pid) {
-			//printf("dirs[i] == pid == %d\n", pid);
+		if (user_tables[i] == pid) {
+			//printf("user_tables[i] == pid == %d\n", pid);
 			unset_proc_ptable(i);
-			dirs[i] = -1;
+			user_tables[i] = -1;
 		}
 	}
 	/*also the table and the pages assigned to the process must by hopped off*/
@@ -207,10 +211,10 @@ uint32_t create_proc_ptable(void) {
 
 	int i = 0;
 	for (i = 0; i < MAX_PROC; i++) {
-		if (dirs[i] == -1) {
+		if (user_tables[i] == -1) {
 			set_proc_ptable(i);
-			dirs[i] = nextPID - 1;
-			printf("create_proc_ptable dirs i = %d , pid = %d\n", i,
+			user_tables[i] = nextPID - 1;
+			printf("create_proc_ptable user_tables i = %d , pid = %d\n", i,
 					nextPID - 1);
 
 			//printf("leaving create_proc_ptable\n");
@@ -259,7 +263,7 @@ void initializePaging(void) {
 
 	int i, j, k;
 	for (k = 0; k < MAX_PROC; k++) {
-		dirs[k] = -1;
+		user_tables[k] = -1;
 	}
 
 	/*las paginas de kernel si o si siempre tienen que estar presentes.
@@ -300,6 +304,10 @@ void HopOffPages() {
 	}
 
 	PROCESS * p = GetProcessByPID(CurrentPID);
+
+	/*if (!p->pid){
+		printf("idle esp: %d\n ",p->ESP);
+	}*/
 	int j, flag = 1;
 	void * addr = (void *) ((p->pdir + 64) * PTABLE_ENTRIES * PAGE_SIZE);
 	addr += (PTABLE_ENTRIES * PAGE_SIZE) - 1;
@@ -366,6 +374,8 @@ void checkEsp(int esp) {
 		if (!flag) {
 			//printf("j= %d\n",j);
 			break;
+		}else{
+			//printf("page %d present\n", 1023 - j);
 		}
 		currentEntry = entry; //computes page start address to compare with esp
 	}
@@ -377,18 +387,26 @@ void checkEsp(int esp) {
 	 printf("name: %s ,esp: %d, *currentEntry: %d, subtraction: %d \n",p->name,esp,(*currentEntry),( esp - (*currentEntry) ));
 	 }*/
 
-	/*1024 bytes of tolerance*/
-	if ((esp - (*currentEntry)) < 1024) {
-		printf("\n&&&&&&&&&&&&&&&&&&&& LESS THAN one K &&&&&&&&&&&&&&&&&&&&&&&&&\n");
-		printf("\nlast initialized page %d\n", j - 1);
+	/*if (p->pid == 0 ){
+		//printf("idle esp : %d\n",p->ESP);
+		//printf("idle esp : %d\n",esp);
 		printf("name: %s ,esp: %d, *currentEntry: %d, subtraction: %d \n",
-				p->name, esp, *currentEntry, (esp - (*currentEntry) ));
+				p->name, p->ESP, *currentEntry, (p->ESP - (*currentEntry) ));
+
+	}*/
+
+	/*1024 bytes of tolerance*/
+	if ((/*esp*/p->ESP - (*currentEntry)) < 1024) {
+		printf("\n&&&&&&&&&&&&&&&&&&&& LESS THAN one K &&&&&&&&&&&&&&&&&&&&&&&&&\n");
+		printf("\nlast initialized page %d\n", 1023 - (j - 1));
+		printf("name: %s ,esp: %d, *currentEntry: %d, subtraction: %d \n",
+				p->name, /*esp*/p->ESP, *currentEntry, (/*esp*/p->ESP - (*currentEntry) ));
 		/*asigns a new page*/
 		create_user_page((void*) ((uint32_t) nextAddr), RWUPRESENT, 1);
-	} else if (((esp - (*currentEntry)) > PAGE_SIZE + 2048) && p->pid) {
+	} else if (((/*esp*/ p->ESP - (*currentEntry)) > PAGE_SIZE + 2048) /*&& p->pid*/) {
 		printf("\n&&&&&&&&&&&&&&&&&&&&  STACK 2 BIG &&&&&&&&&&&&&&&&&&&&&&&&&\n");
 		printf("name: %s ,esp: %d, *currentEntry: %d, subtraction: %d \n",
-				p->name, esp, *currentEntry, (esp - (*currentEntry) ));
+				p->name, /*esp*/p->ESP, *currentEntry, (/*esp*/p->ESP - (*currentEntry) ));
 		takedown_user_page((void*) ((uint32_t) nextAddr), RWUPRESENT, 0);
 		/*detach last page*/
 		//detach_user_page((void*) ((uint32_t) nextAddr), RWUNPRESENT,0);

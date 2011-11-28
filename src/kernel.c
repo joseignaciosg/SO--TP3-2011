@@ -376,7 +376,8 @@ int Idle(int argc, char* argv[])
 {
 	_Sti();
 	while(1)
-	;
+		;
+	return 0;
 }
 
 void end_process(void)

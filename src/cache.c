@@ -5,7 +5,7 @@
 
 #define IS_DIRTY 1
 #define NO_DIRTY 0
-#define CACHE_BLOCKS 128
+#define CACHE_BLOCKS 128 /*2 Mb de cache?*/
 #define TRUE 1
 #define OK 1;
 #define ERROR -1;

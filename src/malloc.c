@@ -82,46 +82,7 @@ void * calloc(int size) {
 	return temp;
 }
 
-//TODO
-void * getBlocks(int size, int type_call) {
-	void * ret;
-	char * aux;
-	int flag = 1,flag2 = 1;
-	int i, j, k;
-	int bocks_needed = (size / BLOCK_SIZE3) + 1;
-	for (i = 0; (i < COUNT_BLOCKS3) && flag; i++) {
-		flag2=1;
-		if (!bitmapBlocks3[i]) { //is not used
-			/*checks if the number of needed bocks is available*/
-			for (j = i; j < bocks_needed ; j++) {
-				if (bitmapBlocks3[j]) { //is used
-					flag2=0;
-					i = j - i + 1; // more efficient
-					break;
-				}
-			}
-			if (flag2){
-				ret = (void*) (THIRD_BLOCK_SPACE_START + i * BLOCK_SIZE3);
-				//bitmapBlocks1[i] = 1;
-				if (type_call == CALLOC) {
-					aux = (char *) ret;
-					for (k = 0; k < BLOCK_SIZE3 * bocks_needed; k++) {
-						aux[j] = '\0';
-					}
-				}
-				/*actualizes the bitmap*/
-				for (j = i; j < size / BLOCK_SIZE3; j++) {
-					bitmapBlocks3[j] = 1;
-					//writeScreen("last initialized third block : %d\n", 33 );
-					//enter();
-				}
-				flag = 0; /*stops outer for*/
-			}
-		}
-	}
-	return ret;
 
-}
 
 void * getBlock(int type_block, int type_call) {
 	void * ret;
@@ -176,6 +137,47 @@ void * getBlock(int type_block, int type_call) {
 			}
 		}
 		break;
+	}
+	return ret;
+
+}
+
+//TODO
+void * getBlocks(int size, int type_call) {
+	void * ret;
+	char * aux;
+	int flag = 1,flag2 = 1;
+	int i, j, k;
+	int bocks_needed = (size / BLOCK_SIZE3) + 1;
+	for (i = 0; (i < COUNT_BLOCKS3) && flag; i++) {
+		flag2=1;
+		if (!bitmapBlocks3[i]) { //is not used
+			/*checks if the number of needed bocks is available*/
+			for (j = i; j < bocks_needed ; j++) {
+				if (bitmapBlocks3[j]) { //is used
+					flag2=0;
+					i = j - i + 1; // more efficient
+					break;
+				}
+			}
+			if (flag2){
+				ret = (void*) (THIRD_BLOCK_SPACE_START + i * BLOCK_SIZE3);
+				//bitmapBlocks1[i] = 1;
+				if (type_call == CALLOC) {
+					aux = (char *) ret;
+					for (k = 0; k < BLOCK_SIZE3 * bocks_needed; k++) {
+						aux[j] = '\0';
+					}
+				}
+				/*actualizes the bitmap*/
+				for (j = i; j < size / BLOCK_SIZE3; j++) {
+					bitmapBlocks3[j] = 1;
+					//writeScreen("last initialized third block : %d\n", 33 );
+					//enter();
+				}
+				flag = 0; /*stops outer for*/
+			}
+		}
 	}
 	return ret;
 

@@ -135,6 +135,9 @@ void SetupScheduler(void)
 	idle.pdir = create_proc_ptable();
 	printf("idle stack created. pdir = %d\n", idle.pdir);
 	idle.name = (char*)malloc(8);
+
+	//printf("after idle.name = (char*)malloc(8); \n");
+
 	idle.pid = 0;
 	idle.foreground = 0;
 	idle.priority = 4;

@@ -223,10 +223,12 @@ kmain()
 	initializePaging();
 	_StartCR3();
 	SetupScheduler();
+	printf("after SetupScheduler\n");
 
 	for(h = 0; h < 200; h++){
 		write_disk(0,h,buffer,BLOCK_SIZE,0);
 	}
+
 	fd_table = (filedescriptor *)calloc(100,1);
 	masterBootRecord * mbr = (masterBootRecord *)malloc(512);
 	superblock = (masterBlock*)malloc(512);		
@@ -241,10 +243,13 @@ kmain()
 		load_filesystem();
 	}
 	
+
+
 	ready = NULL;
 	for(i = 0; i < 4; i++)
 		startTerminal(i);
-	
+
+
 	logPID = CreateProcessAt("Login", (int(*)(int, char**))logUser, 0, 0, (char**)0, PAGE_SIZE, 4, 1);
 	_Sti();
 
@@ -692,7 +697,9 @@ void logUser(void)
 	currentUsr.group = ADMIN;
 
 	fd = do_open("usersfile", 777, 777);
+	printf("inside logUser sizeof(user): %d\n ",sizeof(user));
 	usr = malloc(sizeof(user) * 100);
+	printf("user addr %d\n", usr);
 	do_read(fd, (char *)usr, sizeof(user) * 100);
 
 	while(!usrLoged)
@@ -703,6 +710,7 @@ void logUser(void)
 		usrName = 1;
 		block_process(CurrentPID);
 		scanf("%s", buffcopy);
+		//printf("\n usr[i].name %s\n",usr[0].name);
 		for(i = 0; i < 100 && usr[i].usrID != 0 && usrNotFound; i++)
 		{
 			if(strcmp(usr[i].name, buffcopy))

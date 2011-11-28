@@ -214,8 +214,8 @@ uint32_t create_proc_ptable(void) {
 		if (user_tables[i] == -1) {
 			set_proc_ptable(i);
 			user_tables[i] = nextPID - 1;
-			printf("create_proc_ptable user_tables i = %d , pid = %d\n", i,
-					nextPID - 1);
+			//printf("create_proc_ptable user_tables i = %d , pid = %d\n", i,
+			//		nextPID - 1);
 
 			//printf("leaving create_proc_ptable\n");
 			return i;
@@ -292,7 +292,7 @@ int LoadAuxStack() {
 	 * Se cambia al stack auxiliar (con LoadAuxStack)
 	 *
 	 */
-	return 0x06000000;/* 96Mb */
+	return 0x07000000;/* 96Mb */
 
 }
 

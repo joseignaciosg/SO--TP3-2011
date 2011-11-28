@@ -249,7 +249,7 @@ kmain()
 	for(i = 0; i < 4; i++)
 		startTerminal(i);
 
-
+	free(mbr);
 	logPID = CreateProcessAt("Login", (int(*)(int, char**))logUser, 0, 0, (char**)0, PAGE_SIZE, 4, 1);
 	_Sti();
 
@@ -758,6 +758,8 @@ void logUser(void)
 	terminals[3].PID = CreateProcessAt("Shell3", (int(*)(int, char**))shell, 3, 0, (char**)0, PAGE_SIZE, 2, 1);
 	//printf("terminals[3].PID \n");
 	do_close(fd);
+
+	free(usr);
 	_Sti();
 	return;
 }
@@ -813,5 +815,6 @@ void createusr(char * name, char * password, char * group)
 
 	current = aux;
 
+	free(usr);
 	return;	
 }

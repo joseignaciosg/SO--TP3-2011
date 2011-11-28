@@ -21,7 +21,7 @@
  * to address   0x01000000
  * block of size BLOCK_SIZE1
  * */
-#define FIRST_BLOCK_SPACE_SIZE 0x01000000 - 0x00300000
+#define FIRST_BLOCK_SPACE_SIZE (0x01000000 - 0x00300000)
 #define FIRST_BLOCK_SPACE_START 0x00300000
 
 /*
@@ -29,7 +29,7 @@
  * to address   0x04000000
  * block of size BLOCK_SIZE2
  * */
-#define SECOND_BLOCK_SPACE_SIZE 0x04000000 - 0x01000000
+#define SECOND_BLOCK_SPACE_SIZE (0x04000000 - 0x01000000)
 #define SECOND_BLOCK_SPACE_START 0x01000000
 
 /*
@@ -37,12 +37,12 @@
  * to address   0x07000000
  * block of size BLOCK_SIZE3
  * */
-#define THIRD_BLOCK_SPACE_SIZE 0x07000000 - 0x04000000
+#define THIRD_BLOCK_SPACE_SIZE (0x07000000 - 0x04000000)
 #define THIRD_BLOCK_SPACE_START 0x04000000
 
-#define COUNT_BLOCKS1 FIRST_BLOCK_SPACE_SIZE / BLOCK_SIZE1
-#define COUNT_BLOCKS2 SECOND_BLOCK_SPACE_SIZE / BLOCK_SIZE2
-#define COUNT_BLOCKS3 THIRD_BLOCK_SPACE_SIZE / BLOCK_SIZE3
+#define COUNT_BLOCKS1 (FIRST_BLOCK_SPACE_SIZE) / BLOCK_SIZE1
+#define COUNT_BLOCKS2 (SECOND_BLOCK_SPACE_SIZE) / BLOCK_SIZE2
+#define COUNT_BLOCKS3 (THIRD_BLOCK_SPACE_SIZE) / BLOCK_SIZE3
 
 static char bitmapBlocks1[COUNT_BLOCKS1] = { 0 };
 static char bitmapBlocks2[COUNT_BLOCKS2] = { 0 };
@@ -171,15 +171,50 @@ void * getBlocks(int size, int type_call) {
 				}
 				/*actualizes the bitmap*/
 				for (j = i; j < size / BLOCK_SIZE3; j++) {
-					bitmapBlocks3[j] = 1;
+					//bitmapBlocks3[j] = 1;
 					//writeScreen("last initialized third block : %d\n", 33 );
-					//enter();
+					enter();
 				}
 				flag = 0; /*stops outer for*/
 			}
 		}
 	}
 	return ret;
+
+}
+
+void free(void * p){
+	int curr_size;
+	int count;
+	int pos;
+	if ( (int)p < SECOND_BLOCK_SPACE_START){
+		curr_size = SECOND_BLOCK_SPACE_START - (int)p;
+		count = curr_size / BLOCK_SIZE1;
+		pos = COUNT_BLOCKS1 - count;
+		bitmapBlocks1[pos]=0;
+//		printf("\npos: %d \n",pos);
+//		printf("\np: %d \n",(int)p);
+		//is necessary to clean it up?
+	}else if( (int)p < THIRD_BLOCK_SPACE_START ){
+		curr_size = THIRD_BLOCK_SPACE_START - (int)p;
+		count = curr_size / BLOCK_SIZE2;
+		pos = COUNT_BLOCKS2 - count;
+		bitmapBlocks2[pos]=0;
+//		printf("\npos: %d \n",pos);
+//		printf("\npos: %d \n",(int)p);
+	}else{
+		curr_size = THIRD_BLOCK_SPACE_START + (THIRD_BLOCK_SPACE_SIZE) - (int)p;
+		count = curr_size / BLOCK_SIZE3;
+		//printf("\ncount: %d ",count);
+		pos = COUNT_BLOCKS3 - count;
+		printf("\n bitmapBlocks3[pos] :%d",bitmapBlocks3[pos]);
+		printf("\n bitmapBlocks3[pos+1]  :%d",bitmapBlocks3[pos+1]);
+		printf("\n bitmapBlocks3[pos+2]  :%d",bitmapBlocks3[pos+2]);
+		bitmapBlocks3[pos]=0;
+		printf("\npos: %d ",pos);
+		printf("\np: %d \n",(int)p);
+
+	}
 
 }
 

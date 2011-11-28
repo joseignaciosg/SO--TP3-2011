@@ -207,12 +207,12 @@ void free(void * p){
 		count = curr_size / BLOCK_SIZE3;
 		//printf("\ncount: %d ",count);
 		pos = COUNT_BLOCKS3 - count;
-		printf("\n bitmapBlocks3[pos] :%d",bitmapBlocks3[pos]);
-		printf("\n bitmapBlocks3[pos+1]  :%d",bitmapBlocks3[pos+1]);
-		printf("\n bitmapBlocks3[pos+2]  :%d",bitmapBlocks3[pos+2]);
+		//printf("\n bitmapBlocks3[pos] :%d",bitmapBlocks3[pos]);
+		//printf("\n bitmapBlocks3[pos+1]  :%d",bitmapBlocks3[pos+1]);
+		//printf("\n bitmapBlocks3[pos+2]  :%d",bitmapBlocks3[pos+2]);
 		bitmapBlocks3[pos]=0;
-		printf("\npos: %d ",pos);
-		printf("\np: %d \n",(int)p);
+		//printf("\npos: %d ",pos);
+		//printf("\np: %d \n",(int)p);
 
 	}
 

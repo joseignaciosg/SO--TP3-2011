@@ -8,7 +8,7 @@
 *
 ***********************************/
 
-int nextfree = 0x300000;
+int nextfree = 0x200000;
 
 
 void * malloc (int size)

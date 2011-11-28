@@ -90,14 +90,6 @@ typedef struct{
 	char relleno[52];
 }iNode;
 
-typedef struct fsNode{
-	struct fsNode * son;
-	struct fsNode * father;
-	iNode * inode;
-	char * name;
-	int last;
-}fsNode;
-
 typedef struct{
 	char * name;
 	int blockSize;
@@ -121,12 +113,6 @@ typedef struct{
 typedef struct{
 	void * disk;
 }virtualDisk;
-
-typedef struct{
-	int fd;
-	char * path;
-}fileDescriptor;
-
 
 typedef struct{
 	int fd;
@@ -536,7 +522,17 @@ int delete_fd(int filedescriptor);
 
 void substr(char dest[], char src[], int offset, int len);
 
+void rename_file(int iNode_number, char * new_name);
 
+void mv(char * filename, char * path);
+
+void cp(char * filename, char * path);
+
+void cp_file(char * filename, iNode * current, iNode * path_inode);
+
+void cp_dir(char * filename, iNode * path_inode);
+
+void recursive_cp(char * filename, iNode * origin, iNode * destination);
 
 //word_t data[N / 32 + 1];
 BM * bitmap;

@@ -318,7 +318,13 @@ parseBuffer() {
 		create_n_bytes(buffcopyparsed[1]);
 		isFront = 0;
 	}else if(strcmp("cd ", buffcopyparsed[0])){
-		cd(buffcopyparsed[1]);/*rmDir*/
+		cd(buffcopyparsed[1]);
+		isFront = 0;
+	}else if(strcmp("mv ", buffcopyparsed[0])){
+		mv(buffcopyparsed[1], buffcopyparsed[2]);
+		isFront = 0;
+	}else if(strcmp("cp ", buffcopyparsed[0])){
+		cp(buffcopyparsed[1], buffcopyparsed[2]);
 		isFront = 0;
 	}else {
 		invalidcom = TRUE;

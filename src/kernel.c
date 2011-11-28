@@ -294,6 +294,7 @@ int CreateProcessAt_in_kernel(createProcessParam * param)
 	proc->sleep = 0;
 	proc->acum = param->priority + 1;
 	set_Process_ready(proc);
+	printf("inside CreateProcessAt_in_kernel, pid: %d \n",proc->pid) ;
 	//printf("process created\n");
 
 	return proc->pid;
@@ -691,11 +692,11 @@ void sleep(int secs)
 
 void logUser(void)
 {
+	printf("inside logUser\n");
 	int i, fd, usrNotFound, j;
 	user * usr;
 	current = superblock->root;
 	currentUsr.group = ADMIN;
-
 	fd = do_open("usersfile", 777, 777);
 	printf("inside logUser sizeof(user): %d\n ",sizeof(user));
 	usr = malloc(sizeof(user) * 100);
@@ -771,7 +772,10 @@ void logout(int argc, char * argv[])
 	usrLoged = 0;
 	for(i = 0; i < 4; i++)
 		kill(terminals[i].PID);
+	printf("inside logout , after kill terminals\n");
 	logPID = CreateProcessAt("logUsr", (int(*)(int, char**))logUser, currentProcessTTY, 0, (char**)0, PAGE_SIZE, 4, 1);
+	printf("inside logout , after CreateProcessAt logUser\n");
+
 	_Sti();
 }
 

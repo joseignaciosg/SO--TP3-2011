@@ -101,13 +101,14 @@ showSplashScreen() {
 	return;
 }
 
-void
+/*void
 wait(int sec) {
 	tickswait = 0;
 	while ((tickswait * 0.055) <= sec)
 		;
 	return;
 }
+*/
 
 void
 showLastCommand() {
@@ -238,12 +239,12 @@ parseBuffer() {
 		cleared_screen = TRUE;
 		isFront = 0;
 	} else if (strcmp("printftest", buffcopy)) {
-		putc('\n');
-		printfTest();
-		isFront = 0;
+	//	putc('\n');
+	//	printfTest();
+	//	isFront = 0;
 	} else if (strcmp("getCPUSpeed", buffcopy)) {
 		putc('\n');
-		printf("CPU Speed: %ld  MHz", getCPUSpeed());
+	//	printf("CPU Speed: %ld  MHz", getCPUSpeed());
 		isFront = 0;
 	} else if (strcmp("help", buffcopy)) {
 		putc('\n');

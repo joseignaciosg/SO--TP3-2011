@@ -764,6 +764,7 @@ void rmDir(char * path) {
 	iNode * posible_inode = current;
 	posible_inode = parser_path(path, posible_inode);
 
+	printf("\ninside rmDIR \n");
 	if (posible_inode == NULL) {
 		printf("Wrong name or path\n");
 		return;
@@ -774,11 +775,12 @@ void rmDir(char * path) {
 		return;
 	}
 	if (posible_inode->identifier != DIRECTORY) {
+		printf("\ninside rmDIR \n");
 
 		int inode_number = posible_inode->iNode_number;
 		int init_block = current->data.direct_blocks[0];
-		directoryEntry * dr = (directoryEntry*) calloc(sizeof(directoryEntry),
-				96);
+		directoryEntry * dr = (directoryEntry*) calloc(sizeof(directoryEntry),96);
+		printf("\n sizeof directoryEntry %d\n",sizeof(directoryEntry) );
 		read_disk(0, init_block, dr, BLOCK_SIZE * 12, 0);
 		for (i = 2; i < 96; i++) {
 			if (dr[i].inode == inode_number) {
@@ -1145,56 +1147,6 @@ void cat_in_kernel(char * filename) {
 		read(fd, buffer, -1);
 		printf("\n%s", buffer);
 	}
-}
-
-void link_in_kernel(link_struct * param) {
-	char * path1 = param->path1;
-	char * path2 = param->path2;
-
-	/*if ( strcmp("hola",path1) == 1){
-	 printf("ENTRO\n");
-	 }	*/
-	int path2_len, i, index_file_name, quant_chars;
-	char * directory_path;
-	char * name;
-	iNode * path1_inode = current;
-
-	path1_inode = search_directory(path1, superblock->root);
-
-	if (path1_inode == NULL) {
-		printf("Wrong name or path\n");
-	}
-
-	path2_len = str_len(path2);
-	for (i = path2_len; i >= 0; i--) {
-		if (path2[i] == '/') {
-			index_file_name = i;
-			break;
-		}
-	}
-
-	if (i >= 0) {
-		quant_chars = path2_len - (path2_len - index_file_name) + 1;
-		directory_path = malloc(quant_chars);
-		name = malloc(path2_len - quant_chars);
-		memcpy(directory_path, path2, quant_chars);
-		memcpy(name, path2 + quant_chars, path2_len - quant_chars);
-
-		iNode * path2_inode = current;
-		path2_inode = parser_path(directory_path, path2_inode);
-		iNode * link_node = insert_file(name, 777, path2_inode);
-		copy_link_inode(path1_inode, link_node);
-	} else {
-
-		iNode * path2_inode = current;
-		iNode * link_node = insert_file(path2, 2, path2_inode);
-
-		ls("");
-		copy_link_inode(path1_inode, link_node);
-		fs_insert_inode(link_node);
-	}
-
-	return;
 }
 
 void links(char * path1, char * path2) {

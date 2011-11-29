@@ -249,7 +249,7 @@ kmain()
 	for(i = 0; i < 4; i++)
 		startTerminal(i);
 
-	free(mbr);
+	//free(mbr);
 	logPID = CreateProcessAt("Login", (int(*)(int, char**))logUser, 0, 0, (char**)0, PAGE_SIZE, 4, 1);
 	_Sti();
 
@@ -650,9 +650,6 @@ void int_79(size_t call, size_t param){
 	case CD_COM:
 		cd_in_kernel((char *)param);/*param == path*/
 		break;
-	case LINK_COM:
-		link_in_kernel((link_struct *)param);
-		break;
 	case CREAT_COM:
 		creat_in_kernel((creat_param *)param);
 		break;
@@ -760,7 +757,7 @@ void logUser(void)
 	//printf("terminals[3].PID \n");
 	do_close(fd);
 
-	free(usr);
+//	free(usr);
 	_Sti();
 	return;
 }
@@ -819,6 +816,6 @@ void createusr(char * name, char * password, char * group)
 
 	current = aux;
 
-	free(usr);
+	//free(usr);
 	return;	
 }

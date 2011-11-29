@@ -48,13 +48,14 @@ static char bitmapBlocks1[COUNT_BLOCKS1] = { 0 };
 static char bitmapBlocks2[COUNT_BLOCKS2] = { 0 };
 static char bitmapBlocks3[COUNT_BLOCKS3] = { 0 };
 
+
 void * getBlock(int type_block, int type_call);
 void * getBlocks(int size, int type_call);
 
 void * malloc(int size) {
 	void * temp;
 	//printf("inside malloc\n");
-	if (size <= BLOCK_SIZE1) {
+	if (size < BLOCK_SIZE1) {
 		//printf("malloc here \n");
 		temp = getBlock(1, MALLOC);
 	} else if (size <= BLOCK_SIZE2) {
@@ -62,22 +63,23 @@ void * malloc(int size) {
 	} else if (size <= BLOCK_SIZE3) {
 		temp = getBlock(3, MALLOC);
 	} else {
-		temp = getBlocks(size, MALLOC);
+		//temp = getBlocks(size, MALLOC);
 	}
 	return temp;
 }
 
-void * calloc(int size) {
+void * calloc(int size, int quant) {
 	void * temp;
+	size *= quant;
 	//printf("inside calloc\n");
-	if (size <= BLOCK_SIZE1) {
+	if (size < BLOCK_SIZE1) {
 		temp = getBlock(1, CALLOC);
-	} else if (size <= BLOCK_SIZE2) {
+	} else if (size < BLOCK_SIZE2) {
 		temp = getBlock(2, CALLOC);
-	} else if (size <= BLOCK_SIZE3) {
+	} else if (size < BLOCK_SIZE3) {
 		temp = getBlock(3, CALLOC);
 	} else {
-		temp = getBlocks(size, CALLOC);
+		//temp = getBlocks(size, CALLOC);
 	}
 	return temp;
 }
@@ -142,7 +144,6 @@ void * getBlock(int type_block, int type_call) {
 
 }
 
-//TODO
 void * getBlocks(int size, int type_call) {
 	void * ret;
 	char * aux;
@@ -152,7 +153,7 @@ void * getBlocks(int size, int type_call) {
 	for (i = 0; (i < COUNT_BLOCKS3) && flag; i++) {
 		flag2=1;
 		if (!bitmapBlocks3[i]) { //is not used
-			/*checks if the number of needed bocks is available*/
+			//checks if the number of needed bocks is available
 			for (j = i; j < bocks_needed ; j++) {
 				if (bitmapBlocks3[j]) { //is used
 					flag2=0;
@@ -169,13 +170,13 @@ void * getBlocks(int size, int type_call) {
 						aux[j] = '\0';
 					}
 				}
-				/*actualizes the bitmap*/
+				//actualizes the bitmap
 				for (j = i; j < size / BLOCK_SIZE3; j++) {
 					//bitmapBlocks3[j] = 1;
 					//writeScreen("last initialized third block : %d\n", 33 );
 					enter();
 				}
-				flag = 0; /*stops outer for*/
+				flag = 0; //stops outer for
 			}
 		}
 	}
@@ -218,7 +219,8 @@ void free(void * p){
 
 }
 
-/*int nextfree = 0x300000;
+/*
+int nextfree = 0x300000;
 
 
  void * malloc (int size)

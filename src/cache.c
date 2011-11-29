@@ -74,9 +74,9 @@ int cache_insertblock(int baseblock, char * insertdata, int amountblocks){
 		cache_insertblock(baseblock,insertdata,amountblocks);
 		
 	}else{
-		for(j=numblock; j < (numblock+cantblocks); j+=32){
+		for(j=numblock; j < (numblock+cantblocks); j+=FREE_BLOCKS){
 			if ( !cache_isinarray(j) ){
-				for ( i = 0; i < 32; i++){
+				for ( i = 0; i < FREE_BLOCKS; i++){
 					fblock = cache_findfreeblock();
 					cache_array[fblock].num_block = j + i;
 					cache_array[fblock].dirty = 0;
@@ -159,14 +159,14 @@ void cache_printblocks(){
 int cache_aprox32(int baseblock, int cantblocks){
 	
 	//printf("APROX>>Base:%d-cantblocks:%d\n",baseblock,cantblocks);
-	return ( (cache_getbase(baseblock+cantblocks) + 32) - cache_getbase(baseblock));
+	return ( (cache_getbase(baseblock+cantblocks) + FREE_BLOCKS) - cache_getbase(baseblock));
 	
 }
 
 //Devuelve la base del bloque para tomar 32.
 int cache_getbase(int baseblock){
 	
-	return ((int)(baseblock/32)*32)+1;
+	return ((int)(baseblock/FREE_BLOCKS)*FREE_BLOCKS)+1;
 	
 }
 

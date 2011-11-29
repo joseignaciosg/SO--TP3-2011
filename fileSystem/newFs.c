@@ -21,7 +21,7 @@ int write_disk(int ata, int sector, void * msg, int count, int offset) {
 
 	//##################### NEW
 
-	/*int quantblocks = (int) (count / 512) + 1;
+	int quantblocks = (int) (count / 512) + 1;
 	if (quantblocks > CACHE_BLOCKS) {
 		return _disk_write(0x1f0, (char *) msg, quantblocks, sector + 1);
 		return -1; //disk_write(block,buffer,size);
@@ -41,8 +41,8 @@ int write_disk(int ata, int sector, void * msg, int count, int offset) {
 	//escribo de la cache en el buffer y marco como dirty.
 
 	//##################### NEW
-*/
-	return _disk_write(0x1f0, (char *) msg, count / 512, sector + 1);
+
+//	return _disk_write(0x1f0, (char *) msg, count / 512, sector + 1);
 
 }
 
@@ -62,7 +62,7 @@ int read_disk(int ata, int sector, void * msg, int count, int lenght) {
 
 	//##################### NEW
 	/*new cache stuff according to hipotetical_read*/
-/*	int reads;
+	int reads;
 	int quantblocks = (int) (count / 512) + 1;
 	//Si la cantidad de bloques supera a la de la cache entonces leo directamente de disco.
 	if (quantblocks > CACHE_BLOCKS) {
@@ -76,7 +76,7 @@ int read_disk(int ata, int sector, void * msg, int count, int lenght) {
 		//return reads;
 	}
 	return cache_read(sector, msg, count);
-*/
+
 
 	//calculo la cantidad de bloques.
 	//me fijo en la cache si estan todos los bloques.
@@ -84,7 +84,7 @@ int read_disk(int ata, int sector, void * msg, int count, int lenght) {
 	//devuelvo lo que esta en la cache en el buffer
 
 	//##################### NEW
-	return _disk_read(0x1f0,(char*)msg,count/512,sector+1);
+//	return _disk_read(0x1f0,(char*)msg,count/512,sector+1);
 
 }
 

@@ -1,46 +1,19 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<time.h>
-#include<string.h>
+//#include<stdio.h>
+//#include<stdlib.h>
+//#include<time.h>
+//#include<string.h>
 
-
-
-#define IS_DIRTY 1
-#define NO_DIRTY 0
-#define CACHE_BLOCKS 128 /*2 Mb de cache?*/
-#define TRUE 1
-#define OK 1;
-#define ERROR -1;
-
-typedef struct{
-	char data[512];
-	int num_block;
-	int dirty;
-}blockVector;
-
-void mergesort(blockVector a[], int low, int high);
-int cache_searchblockpackage(int block, int quantblocks);
-int cache_findblock(int num);
-char * cache_getdata(int num);
-void cache_sortarray();
-void cache_initarray();
-void cache_removeblocks(int a, int b);
-void cache_printblocks();
-int cache_aprox32(int baseblock, int cantblocks);
-int cache_getbase(int baseblock);
-int cache_isinarray(int num);
-void cache_freeall();
-int flushall();
-
-int cache_read(int block, char * data, int size);
-int cache_write(int block, char * data, int size);
-
-int hipotetical_write(int block, char * buffer, int size);
-int hipotetical_read(int block, char * buffer, int size);
+#include "../include/cache.h"
+#include "../include/defs.h"
 
 blockVector cache_array[CACHE_BLOCKS];
 int cache_freeblocks = CACHE_BLOCKS;
 int dirties = 0;
+
+/*double linked list for last used sectors*/
+//blockVectorNode first = NULL;
+//blockVectorNode last = NULL;
+
 
 
 
@@ -83,7 +56,7 @@ int cache_insertblock(int baseblock, char * insertdata, int amountblocks){
 	int i, j,fblock;
 	int cantblocks = cache_aprox32(baseblock,amountblocks);
 	int numblock = cache_getbase(baseblock);
-	printf("base:%d--offset:%d\n",numblock,cantblocks);
+	//printf("base:%d--offset:%d\n",numblock,cantblocks);
 	
 	if ( insertdata == NULL ){
 		return -1;
@@ -181,7 +154,7 @@ void cache_printblocks(){
 //Aproxima en base al numero que le pasan a 32 bloques
 int cache_aprox32(int baseblock, int cantblocks){
 	
-	printf("APROX>>Base:%d-cantblocks:%d\n",baseblock,cantblocks);
+	//printf("APROX>>Base:%d-cantblocks:%d\n",baseblock,cantblocks);
 	return ( (cache_getbase(baseblock+cantblocks) + 32) - cache_getbase(baseblock));
 	
 }

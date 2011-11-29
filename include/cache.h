@@ -34,3 +34,4 @@ int cache_isinarray(int num);
 void sync();
 int cache_readblock(int baseblock, char * rcv_data, int amountblocks);
 int cache_insertblock(int baseblock, char * insertdata, int amountblocks);
+

@@ -20,9 +20,10 @@
 #include "../include/paging.h"
 #include "../include/malloc.h"
 #include "../include/video.h"
+#include "../include/cache.h"
 
 
-DESCR_INT idt[0x90]; /* IDT 144 positions*/
+DESCR_INT idt[0x85]; /* IDT 144 positions*/
 IDTR idtr;			 /* IDTR */
 
 int nextPID = 1;
@@ -215,9 +216,14 @@ kmain()
 	char * buffer = calloc(512 , 1);
 	_Cli();
 	k_clear_screen();
-
+	printf("screen clear\n");
+	//cache_initarray();
+	printf("array init\n");
+	//cache_sortarray();
+	printf("array sort\n");
 
 	initializeSemaphoreTable();
+	printf("semaphore init\n");
 	initializeIDT();
 	unmaskPICS();
 	initializePaging();
@@ -243,8 +249,6 @@ kmain()
 		load_filesystem();
 	}
 	
-
-
 	ready = NULL;
 	for(i = 0; i < 4; i++)
 		startTerminal(i);
@@ -287,15 +291,12 @@ int CreateProcessAt_in_kernel(createProcessParam * param)
 	proc->tty = param->tty;
 	proc->stacksize =  1024;
 	proc->stackstart = get_stack_start(proc->pdir);
-	//proc->stackstart = (uint32_t)malloc(1024 * 4096);
 	proc->ESP = LoadStackFrame(param->process, param->argc, param->argv, (uint32_t)((char *)proc->stackstart /*+ proc->stacksize*/), end_process);
 	proc->parent = CurrentPID;
 	proc->waitingPid = 0;
 	proc->sleep = 0;
 	proc->acum = param->priority + 1;
 	set_Process_ready(proc);
-	//printf("inside CreateProcessAt_in_kernel, pid: %d \n",proc->pid) ;
-	//printf("process created\n");
 
 	return proc->pid;
 }
@@ -305,7 +306,6 @@ uint32_t LoadStackFrame(int(*process)(int,char**),int argc,char** argv, uint32_t
 {
 	STACK_FRAME * frame = (STACK_FRAME*)(bottom - sizeof(STACK_FRAME));
 	frame->EBP = 0;
-	//printf("inside LoadStackFrame\n");
 	frame->EIP = (int)process;
 	frame->CS = 0x08;
 	frame->EFLAGS = 0;
@@ -691,15 +691,12 @@ void sleep(int secs)
 
 void logUser(void)
 {
-	//printf("inside logUser\n");
 	int i, fd, usrNotFound, j;
 	user * usr;
 	current = superblock->root;
 	currentUsr.group = ADMIN;
 	fd = do_open("usersfile", 777, 777);
-	//printf("inside logUser sizeof(user): %d\n ",sizeof(user));
 	usr = malloc(sizeof(user) * 100);
-	//printf("user addr %d\n", usr);
 	do_read(fd, (char *)usr, sizeof(user) * 100);
 
 	while(!usrLoged)
@@ -710,13 +707,11 @@ void logUser(void)
 		usrName = 1;
 		block_process(CurrentPID);
 		scanf("%s", buffcopy);
-		//printf("\n usr[i].name %s\n",usr[0].name);
 		for(i = 0; i < 100 && usr[i].usrID != 0 && usrNotFound; i++)
 		{
 			if(strcmp(usr[i].name, buffcopy))
 			{
 				usrNotFound = 0;
-				//strcopy(userName, buffcopy, str_len(buffcopy));
 			}
 		}
 		usrName = 0;
@@ -734,8 +729,6 @@ void logUser(void)
 			if(strcmp(usr[i - 1].password, buffcopy))
 			{
 				usrLoged = 1;
-				//strcopy(currentUsr.password, buffcopy, str_len(buffcopy));
-				//strcopy(currentUsr.name, userName, str_len(userName));
 				currentUsr.usrID = usr[i - 1].usrID;
 				currentUsr.group = usr[i - 1].group;
 			}
@@ -771,9 +764,7 @@ void logout(int argc, char * argv[])
 	usrLoged = 0;
 	for(i = 0; i < 4; i++)
 		kill(terminals[i].PID);
-	printf("inside logout , after kill terminals\n");
 	logPID = CreateProcessAt("logUsr", (int(*)(int, char**))logUser, currentProcessTTY, 0, (char**)0, PAGE_SIZE, 4, 1);
-	printf("inside logout , after CreateProcessAt logUser\n");
 
 	_Sti();
 }

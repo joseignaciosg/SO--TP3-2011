@@ -19,6 +19,7 @@ int cache_freeblocks = CACHE_BLOCKS;
 int dirties = 0;
 int total_access_count = 0;
 
+
 void remove_block_from_cache(int index) {
 	blockVector b = cache_array[index];
 	int j;
@@ -50,26 +51,25 @@ void free_least_used_blocks(int blocks) {
 }
 
 //Busca un index en el array correspondiente al numero de bloque.
-int cache_findblock(int num){
+int cache_findblock(int num) {
 
 	int i;
 
-	for(i = 0; i < CACHE_BLOCKS; i++){
-		if(cache_array[i].num_block == num){
+	for (i = 0; i < CACHE_BLOCKS; i++) {
+		if (cache_array[i].num_block == num) {
 			return i;
-		} 
+		}
 	}
 
 	return -1;
 }
 
-
 //Busca un bloque libre en el array.
 int cache_findfreeblock(){
 	int i;
 
-	for(i=0;i< CACHE_BLOCKS; i++){
-		if( cache_array[i].num_block == -1 ){
+	for (i = 0; i < CACHE_BLOCKS; i++) {
+		if (cache_array[i].num_block == -1) {
 			return i;
 		}
 	}
@@ -154,73 +154,74 @@ int cache_readblock(int baseblock, char * rcv_data, int amountblocks){
 
 
 //Basicamente pregunta si el bloque esta en el array o no...
-int cache_isinarray(int num){
+int cache_isinarray(int num) {
 	int i;
 
-	for(i=0; i<CACHE_BLOCKS && (cache_array[i].num_block <= num);i++){
+	for (i = 0; i < CACHE_BLOCKS && (cache_array[i].num_block <= num); i++) {
 		//printf("ENTRE:array:%d-numblock:%d&i:%d\n",cache_array[i].num_block,num,i);	
-		if(cache_array[i].num_block == num){
+		if (cache_array[i].num_block == num) {
 			return 1;
 		}
 	}
-	
+
 	return 0;
 }
 
 
 //ordena el arreglo de bloques de manera ascendente (Creo ja)
-void cache_sortarray(){
+void cache_sortarray() {
 	mergesort(cache_array, 0, CACHE_BLOCKS - 1);
 	return;
 }
 
-
 //Inicializa el array
-void cache_initarray(){
+void cache_initarray() {
 	int i;
-	for(i = 0; i < CACHE_BLOCKS; i++){
+	for (i = 0; i < CACHE_BLOCKS; i++) {
 		cache_array[i].num_block = -1;
-		cache_array[i].dirty = 0; 
+		cache_array[i].dirty = 0;
 		cache_array[i].access_count = 0;
 	}
 	return;
 }
 
+
 //Mergesort.
 void mergesort(blockVector * a, int low, int high) {
 	int i = 0;
 	int length = high - low + 1;
-	int pivot  = 0;
+	int pivot = 0;
 	int merge1 = 0;
 	int merge2 = 0;
 	blockVector working[length];
 
-	 if(low == high)
-	  return;
+	if (low == high)
+		return;
 
-	 pivot  = (low + high) / 2;
+	pivot = (low + high) / 2;
 
-	 mergesort(a, low, pivot);
-	 mergesort(a, pivot + 1, high);
-	 
-	 for(i = 0; i < length; i++)
-	  working[i] = a[low + i];
+	mergesort(a, low, pivot);
+	mergesort(a, pivot + 1, high);
 
-	 merge1 = 0;
-	 merge2 = pivot - low + 1;
+	for (i = 0; i < length; i++)
+		working[i] = a[low + i];
 
-	 for(i = 0; i < length; i++) {
-	 if(merge2 <= high - low)
-	   if(merge1 <= pivot - low)
-	    if(working[merge1].num_block > working[merge2].num_block && working[merge2].num_block != -1 )
-	     a[i + low] = working[merge2++];
-	    else
-	     a[i + low] = working[merge1++];
-	   else
-	    a[i + low] = working[merge2++];
-	  else
-	   a[i + low] = working[merge1++];
-	 }
+	merge1 = 0;
+	merge2 = pivot - low + 1;
+
+	for (i = 0; i < length; i++) {
+		if (merge2 <= high - low)
+			if (merge1 <= pivot - low)
+				if (working[merge1].num_block > working[merge2].num_block
+						&& working[merge2].num_block != -1)
+					a[i + low] = working[merge2++];
+				else
+					a[i + low] = working[merge1++];
+			else
+				a[i + low] = working[merge2++];
+		else
+			a[i + low] = working[merge1++];
+	}
 }
 
 void sync() {

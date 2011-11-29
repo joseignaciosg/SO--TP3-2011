@@ -19,6 +19,7 @@ extern int cache_freeblocks;
 
 int write_disk(int ata, int sector, void * msg, int count, int offset) {
 
+
 	int quantblocks = (int) (count / 512) + 1;
 	if (quantblocks > CACHE_BLOCKS) {
 		return _disk_write(0x1f0, (char *) msg, quantblocks, sector + 1);

@@ -76,7 +76,7 @@
 #define FALSE 0
 #define NULL 0
 
-#define MAX_NUM 25		/*Maxima cantidad de digitos de un int*/
+#define MAX_NUM 20		/*Maxima cantidad de digitos de un int*/
 
 #define MAX_PRIORITY 4
 #define PRIORITY_RATIO 2
@@ -168,8 +168,8 @@ typedef struct{
 }processNode;
 
 typedef struct{
-	char name[256];
-	char password[256];
+	char name[50];
+	char password[50];
 	int usrID;
 	groupID group;
 }user;

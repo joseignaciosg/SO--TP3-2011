@@ -25,7 +25,7 @@
 
 
 /***	Module Defines	***/
-#define STO_MAX  100
+#define STO_MAX  20
 
 char storedComm[STO_MAX][BUFFER_SIZE + 1];
 int arrow_pressed = FALSE;

@@ -49,7 +49,7 @@
 #define DEV_PER_DRIVE 5 /* hd0 + hd1 + hd2 + hd3 + hd4 = 5 */
 
 
-enum{ READ_DISK = 0, WRITE_DISK, OK, ERROR };
+//enum{ READ_DISK = 0, WRITE_DISK, OK, ERROR };
 
 int driver(char * ata);
 

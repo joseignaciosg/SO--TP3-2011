@@ -46,6 +46,7 @@ extern user currentUsr;
 
 static int read_command();
 
+/*
 char
 * splash_screen[25] = {
 	"                                                                               ",
@@ -72,7 +73,7 @@ char
 	"                                                                               ",
 	"                                                                               ",
 	"                                                                               "};
-
+*/
 
 void
 printShellLine() {
@@ -95,18 +96,18 @@ void
 showSplashScreen() {
 	int i;
 	for (i = 0; i < 24; i++) {
-		printf("%s", splash_screen[i]);
+	//	printf("%s", splash_screen[i]);
 	}
 	return;
 }
 
-void
+/*void
 wait(int sec) {
 	tickswait = 0;
 	while ((tickswait * 0.055) <= sec)
 		;
 	return;
-}
+}*/
 
 void
 showLastCommand() {
@@ -236,13 +237,9 @@ parseBuffer() {
 		k_clear_screen();
 		cleared_screen = TRUE;
 		isFront = 0;
-	} else if (strcmp("printftest", buffcopy)) {
-		putc('\n');
-		printfTest();
-		isFront = 0;
 	} else if (strcmp("getCPUSpeed", buffcopy)) {
 		putc('\n');
-		printf("CPU Speed: %ld  MHz", getCPUSpeed());
+		//printf("CPU Speed: %ld  MHz", getCPUSpeed());
 		isFront = 0;
 	} else if (strcmp("help", buffcopy)) {
 		putc('\n');
@@ -320,6 +317,12 @@ parseBuffer() {
 		isFront = 0;
 	}else if(strcmp("cd ", buffcopyparsed[0])){
 		cd(buffcopyparsed[1]);/*rmDir*/
+		isFront = 0;
+	}else if(strcmp("cp ", buffcopyparsed[0])){
+		cp(buffcopyparsed[1],buffcopyparsed[2]);
+		isFront = 0;
+	}else if(strcmp("mv ", buffcopyparsed[0])){
+		mv(buffcopyparsed[1],buffcopyparsed[2]);
 		isFront = 0;
 	}else {
 		invalidcom = TRUE;

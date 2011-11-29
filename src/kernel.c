@@ -249,7 +249,7 @@ kmain()
 	for(i = 0; i < 4; i++)
 		startTerminal(i);
 
-	free(mbr);
+	//free(mbr);
 	logPID = CreateProcessAt("Login", (int(*)(int, char**))logUser, 0, 0, (char**)0, PAGE_SIZE, 4, 1);
 	_Sti();
 
@@ -421,8 +421,9 @@ void end_process(void)
 		if(last100[i] == proc->pid)
 			last100[i] = -1;
 
-	_Sti();
 	clear_proc_ptable(proc->pid); /*error*/
+	printf("ended process\n");
+	_Sti();
 
 	return ;
 }
@@ -650,9 +651,6 @@ void int_79(size_t call, size_t param){
 	case CD_COM:
 		cd_in_kernel((char *)param);/*param == path*/
 		break;
-	case LINK_COM:
-		link_in_kernel((link_struct *)param);
-		break;
 	case CREAT_COM:
 		creat_in_kernel((creat_param *)param);
 		break;
@@ -692,15 +690,15 @@ void sleep(int secs)
 
 void logUser(void)
 {
-	printf("inside logUser\n");
+	//printf("inside logUser\n");
 	int i, fd, usrNotFound, j;
 	user * usr;
 	current = superblock->root;
 	currentUsr.group = ADMIN;
 	fd = do_open("usersfile", 777, 777);
-	printf("inside logUser sizeof(user): %d\n ",sizeof(user));
+	//printf("inside logUser sizeof(user): %d\n ",sizeof(user));
 	usr = malloc(sizeof(user) * 100);
-	printf("user addr %d\n", usr);
+	//printf("user addr %d\n", usr);
 	do_read(fd, (char *)usr, sizeof(user) * 100);
 
 	while(!usrLoged)
@@ -758,9 +756,9 @@ void logUser(void)
 	//printf("terminals[2].PID \n");
 	terminals[3].PID = CreateProcessAt("Shell3", (int(*)(int, char**))shell, 3, 0, (char**)0, PAGE_SIZE, 2, 1);
 	//printf("terminals[3].PID \n");
-	do_close(fd);
+	//do_close(fd);
 
-	free(usr);
+	//free(usr);
 	_Sti();
 	return;
 }
@@ -819,6 +817,6 @@ void createusr(char * name, char * password, char * group)
 
 	current = aux;
 
-	free(usr);
+	//free(usr);
 	return;	
 }

@@ -90,6 +90,14 @@ typedef struct{
 	char relleno[52];
 }iNode;
 
+typedef struct fsNode{
+	struct fsNode * son;
+	struct fsNode * father;
+	iNode * inode;
+	char * name;
+	int last;
+}fsNode;
+
 typedef struct{
 	char * name;
 	int blockSize;
@@ -113,6 +121,12 @@ typedef struct{
 typedef struct{
 	void * disk;
 }virtualDisk;
+
+typedef struct{
+	int fd;
+	char * path;
+}fileDescriptor;
+
 
 typedef struct{
 	int fd;
@@ -521,6 +535,7 @@ int delete_fd(int filedescriptor);
  */
 
 void substr(char dest[], char src[], int offset, int len);
+
 
 void rename_file(int iNode_number, char * new_name);
 

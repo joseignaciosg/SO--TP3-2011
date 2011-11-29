@@ -556,7 +556,8 @@ iNode * parser_path(char * path, iNode * posible_inode){
 	int status;
 	iNode * old_current = posible_inode;
 	iNode * temp_inode;
-	char buffer[MAX_COMMAND_LENGHT];
+	char * buffer;
+	buffer = malloc(MAX_COMMAND_LENGHT);
 	int index = 0;
 
 	/* Veo que tengo al empezar */
@@ -762,7 +763,7 @@ void rmDir( char * path ){
 
 	if ( posible_inode == NULL )
 	{
-		printf("Wrong name or path\n");
+		printf("\nWrong name or path");
 		return;
 	} 
 
@@ -1414,8 +1415,6 @@ void cp_file(char * filename, iNode * origin, iNode * path_inode)
 	fd = do_open(filename, 1, 2);
 	buff = malloc(getsize(fd));
 	read(fd, buff, -1);
-	//printf("\nhasta ahora todo va bien. filename:%s. buffer:%s", filename, buff);
-	//while(1);
 	current = path_inode;
 	fd = do_open(filename, 1, 777);
 	write(fd, buff, str_len(buff));

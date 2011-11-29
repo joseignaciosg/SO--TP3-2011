@@ -19,73 +19,22 @@ extern int cache_freeblocks;
 
 int write_disk(int ata, int sector, void * msg, int count, int offset) {
 
-	//##################### NEW
-
-	/*int quantblocks = (int) (count / 512) + 1;
+	int quantblocks = (int) (count / 512) + 1;
 	if (quantblocks > CACHE_BLOCKS) {
 		return _disk_write(0x1f0, (char *) msg, quantblocks, sector + 1);
-		return -1; //disk_write(block,buffer,size);
 	}
-	//Si no estan todos los bloques, entonces leo y meto en la cache.
-	if (cache_searchblockpackage(sector, quantblocks) == -1) {
-		char * buffer2 = (char *) malloc(count);
-		_disk_read(0x1f0, (char*) buffer2, quantblocks, sector + 1);
-		cache_insertblock(sector, buffer2, quantblocks );
-	}
-	return cache_write(sector, msg, count);
 
-	//calculo la cantidad de bloques.
-	//si es muy grande lo que me piden para cache leo de disco directamente.
-	//me fijo si estan en la cache.
-	//si no estan me los traigo.
-	//escribo de la cache en el buffer y marco como dirty.
-
-	//##################### NEW
-*/
-	return _disk_write(0x1f0, (char *) msg, count / 512, sector + 1);
-
+	return cache_insertblock(sector, msg, quantblocks);
 }
 
 int read_disk(int ata, int sector, void * msg, int count, int lenght) {
-	int ret = 0, base = 0;
-	/*new cache stuff
-	 if (!cache_isinarray(sector)) {
-	 ret = _disk_read(0x1f0, (char*) msg, count / 512, sector + 1);
-	 base = cache_getbase(0);
-	 cache_insertblock(base, (char*) msg, count / 512);
-	 printf("\ntest read cache\n");
-	 cache_printblocks();
-	 } else {
-	 ret = _disk_read(0x1f0, (char*) msg, count / 512, sector + 1);
-	 return ret;
-	 }*/
 
-	//##################### NEW
-	/*new cache stuff according to hipotetical_read*/
-/*	int reads;
 	int quantblocks = (int) (count / 512) + 1;
-	//Si la cantidad de bloques supera a la de la cache entonces leo directamente de disco.
 	if (quantblocks > CACHE_BLOCKS) {
-		_disk_read(0x1f0, (char*) msg, count / 512, sector + 1);
-		return -1; //disk_read(block,buffer,size);
+		return _disk_read(0x1f0, (char *) msg, quantblocks, sector + 1);
 	}
-	//Si no estan todos los bloques juntos, entonces leo e inserto en al cache.
-	if (cache_searchblockpackage(sector, quantblocks) == -1) {
-		//reads = disk_read(block,buffer,size);
-		cache_insertblock(sector, msg, quantblocks);
-		//return reads;
-	}
-	return cache_read(sector, msg, count);
-*/
 
-	//calculo la cantidad de bloques.
-	//me fijo en la cache si estan todos los bloques.
-	//si no esta leo y pongo todo en cache.
-	//devuelvo lo que esta en la cache en el buffer
-
-	//##################### NEW
-	return _disk_read(0x1f0,(char*)msg,count/512,sector+1);
-
+	return cache_readblock(sector, msg, quantblocks);
 }
 
 void init_filesystem(char * filesystem_name, masterBootRecord * mbr) {

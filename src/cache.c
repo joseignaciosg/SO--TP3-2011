@@ -51,6 +51,37 @@ char * cache_getdata(int num){
 	return cache_array[num].data;	
 }
 
+void remove_block_from_cache( int index ){
+	blockVector b = cache_array[index];
+	int j;
+	if ( b.dirty ){
+		/*sincronize*/
+		_disk_write(0x1f0, (char *) b.data, 1, b.num_block);
+	}
+	b.dirty=0;
+	b.access_count = 0;
+	for (j=0;j<512;j++){
+		b.data[j] = '\0';
+	}
+	b.num_block = -1;
+}
+
+void free_least_used_blocks(int blocks ){
+	int i,j;
+	int min = 0;
+
+	for( i=0; i<blocks;i++){
+		min = 0;
+		for( j=0;j<CACHE_BLOCKS;j++ ){
+			if ( cache_array[j].access_count < cache_array[min].access_count ){
+				min = j;
+			}
+		}
+		remove_block_from_cache(min);
+	}
+
+}
+
 //inserta apartir de un bloque base la data (se le pasa la cantidad de bloques como parametro)
 int cache_insertblock(int baseblock, char * insertdata, int amountblocks){
 	
@@ -67,8 +98,8 @@ int cache_insertblock(int baseblock, char * insertdata, int amountblocks){
 		return -1;
 	}
 	if( (cache_freeblocks - cantblocks) < 0 ){
-		//TODO:Liberarusados
-		printf("Hay que liberar usados\n");
+		free_least_used_blocks(cantblocks-cache_freeblocks);
+		//printf("Hay que liberar usados\n");
 		//TODO:FlushALL.		
 		cache_freeall();
 		cache_insertblock(baseblock,insertdata,amountblocks);

@@ -8,6 +8,7 @@
 #define OK 1;
 #define ERROR -1;
 #define FREE_BLOCKS 32
+#define MAX_TOTAL_ACCESS_COUNT 50
 
 
 typedef struct{
@@ -32,6 +33,8 @@ int cache_getbase(int baseblock);
 int cache_isinarray(int num);
 void cache_freeall();
 int flushall();
+void sync();
+
 
 int cache_read(int block, char * data, int size);
 int cache_write(int block, char * data, int size);

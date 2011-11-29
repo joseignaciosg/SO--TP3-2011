@@ -79,7 +79,7 @@ void * calloc(int size, int quant) {
 	} else if (size < BLOCK_SIZE3) {
 		temp = getBlock(3, CALLOC);
 	} else {
-		//temp = getBlocks(size, CALLOC);
+		temp = getBlocks(size, CALLOC);
 	}
 	return temp;
 }
@@ -183,6 +183,7 @@ void * getBlocks(int size, int type_call) {
 	return ret;
 
 }
+
 
 void free(void * p){
 	int curr_size;

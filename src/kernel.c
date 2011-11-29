@@ -223,7 +223,7 @@ kmain()
 	initializePaging();
 	_StartCR3();
 	SetupScheduler();
-	printf("after SetupScheduler\n");
+	//printf("after SetupScheduler\n");
 
 	for(h = 0; h < 200; h++){
 		write_disk(0,h,buffer,BLOCK_SIZE,0);
@@ -294,7 +294,7 @@ int CreateProcessAt_in_kernel(createProcessParam * param)
 	proc->sleep = 0;
 	proc->acum = param->priority + 1;
 	set_Process_ready(proc);
-	printf("inside CreateProcessAt_in_kernel, pid: %d \n",proc->pid) ;
+	//printf("inside CreateProcessAt_in_kernel, pid: %d \n",proc->pid) ;
 	//printf("process created\n");
 
 	return proc->pid;
@@ -421,8 +421,10 @@ void end_process(void)
 		if(last100[i] == proc->pid)
 			last100[i] = -1;
 
-	_Sti();
+
 	clear_proc_ptable(proc->pid); /*error*/
+	printf("Welcome\n");
+	_Sti();
 
 	return ;
 }
@@ -689,15 +691,15 @@ void sleep(int secs)
 
 void logUser(void)
 {
-	printf("inside logUser\n");
+	//printf("inside logUser\n");
 	int i, fd, usrNotFound, j;
 	user * usr;
 	current = superblock->root;
 	currentUsr.group = ADMIN;
 	fd = do_open("usersfile", 777, 777);
-	printf("inside logUser sizeof(user): %d\n ",sizeof(user));
+	//printf("inside logUser sizeof(user): %d\n ",sizeof(user));
 	usr = malloc(sizeof(user) * 100);
-	printf("user addr %d\n", usr);
+	//printf("user addr %d\n", usr);
 	do_read(fd, (char *)usr, sizeof(user) * 100);
 
 	while(!usrLoged)
@@ -757,7 +759,7 @@ void logUser(void)
 	//printf("terminals[3].PID \n");
 	do_close(fd);
 
-//	free(usr);
+	//free(usr);
 	_Sti();
 	return;
 }

@@ -15,24 +15,22 @@
 #include "../include/cache.h"
 
 extern user currentUsr;
+extern int cache_freeblocks;
 
 int write_disk(int ata, int sector, void * msg, int count, int offset) {
 
 	//##################### NEW
 
-	//sprintf("sector:%d\tcount:%d\n",sector,count);
-	/*new cache stuff according to hipotetical_write*/
 	/*int quantblocks = (int) (count / 512) + 1;
 	if (quantblocks > CACHE_BLOCKS) {
-		_disk_write(0x1f0, (char *) msg, count / 512, sector + 1);
+		return _disk_write(0x1f0, (char *) msg, quantblocks, sector + 1);
 		return -1; //disk_write(block,buffer,size);
 	}
 	//Si no estan todos los bloques, entonces leo y meto en la cache.
 	if (cache_searchblockpackage(sector, quantblocks) == -1) {
 		char * buffer2 = (char *) malloc(count);
-		read_disk(0, sector, buffer2, count, 0);
-		cache_write(sector, buffer2, count);
-		//hipotetical_read(block, buffer2, size);
+		_disk_read(0x1f0, (char*) buffer2, quantblocks, sector + 1);
+		cache_insertblock(sector, buffer2, quantblocks );
 	}
 	return cache_write(sector, msg, count);
 
@@ -41,9 +39,9 @@ int write_disk(int ata, int sector, void * msg, int count, int offset) {
 	//me fijo si estan en la cache.
 	//si no estan me los traigo.
 	//escribo de la cache en el buffer y marco como dirty.
-*/
-	//##################### NEW
 
+	//##################### NEW
+*/
 	return _disk_write(0x1f0, (char *) msg, count / 512, sector + 1);
 
 }
@@ -59,16 +57,16 @@ int read_disk(int ata, int sector, void * msg, int count, int lenght) {
 	 cache_printblocks();
 	 } else {
 	 ret = _disk_read(0x1f0, (char*) msg, count / 512, sector + 1);
-	return ret;
+	 return ret;
 	 }*/
 
 	//##################### NEW
 	/*new cache stuff according to hipotetical_read*/
-	/*int reads;
+/*	int reads;
 	int quantblocks = (int) (count / 512) + 1;
 	//Si la cantidad de bloques supera a la de la cache entonces leo directamente de disco.
 	if (quantblocks > CACHE_BLOCKS) {
-		_disk_read(0x1f0,(char*)msg,count/512,sector+1);
+		_disk_read(0x1f0, (char*) msg, count / 512, sector + 1);
 		return -1; //disk_read(block,buffer,size);
 	}
 	//Si no estan todos los bloques juntos, entonces leo e inserto en al cache.
@@ -77,8 +75,8 @@ int read_disk(int ata, int sector, void * msg, int count, int lenght) {
 		cache_insertblock(sector, msg, quantblocks);
 		//return reads;
 	}
-
 	return cache_read(sector, msg, count);
+*/
 
 	//calculo la cantidad de bloques.
 	//me fijo en la cache si estan todos los bloques.
@@ -86,7 +84,6 @@ int read_disk(int ata, int sector, void * msg, int count, int lenght) {
 	//devuelvo lo que esta en la cache en el buffer
 
 	//##################### NEW
-*/
 	return _disk_read(0x1f0,(char*)msg,count/512,sector+1);
 
 }
@@ -474,7 +471,6 @@ void print_directories(iNode * current) {
 			printf("%s ", dr[i].name);
 		}
 	}
-	printf("\n");
 	return;
 }
 
@@ -697,8 +693,10 @@ void cd_in_kernel(char * path) {
 	iNode * posible_inode = current;
 	posible_inode = parser_path(path, posible_inode);
 
-	if (posible_inode->gid < currentUsr.group && posible_inode->iNode_number != superblock->root->iNode_number) {
-		printf("\nCan not acces directory %s. Admin permissions required.", path);
+	if (posible_inode->gid < currentUsr.group
+			&& posible_inode->iNode_number != superblock->root->iNode_number) {
+		printf("\nCan not acces directory %s. Admin permissions required.",
+				path);
 		return;
 	}
 
@@ -764,7 +762,6 @@ void rmDir(char * path) {
 	iNode * posible_inode = current;
 	posible_inode = parser_path(path, posible_inode);
 
-	printf("\ninside rmDIR \n");
 	if (posible_inode == NULL) {
 		printf("Wrong name or path\n");
 		return;
@@ -779,8 +776,9 @@ void rmDir(char * path) {
 
 		int inode_number = posible_inode->iNode_number;
 		int init_block = current->data.direct_blocks[0];
-		directoryEntry * dr = (directoryEntry*) calloc(sizeof(directoryEntry),96);
-		printf("\n sizeof directoryEntry %d\n",sizeof(directoryEntry) );
+		directoryEntry * dr = (directoryEntry*) calloc(sizeof(directoryEntry),
+				96);
+		printf("\n sizeof directoryEntry %d\n", sizeof(directoryEntry));
 		read_disk(0, init_block, dr, BLOCK_SIZE * 12, 0);
 		for (i = 2; i < 96; i++) {
 			if (dr[i].inode == inode_number) {
@@ -1209,9 +1207,7 @@ void copy_link_inode(iNode * inode, iNode * reciever_inode) {
 
 }
 
-
-void mv(char * filename, char * path)
-{
+void mv(char * filename, char * path) {
 	int i, name_length, type;
 	filename[str_len(filename) - 1] = 0;
 	iNode * path_inode = current;
@@ -1219,83 +1215,81 @@ void mv(char * filename, char * path)
 	iNode * filename_inode = current;
 	filename_inode = parser_path(filename, filename_inode);
 
-	if(filename_inode->gid < currentUsr.group)
-	{
+	if (filename_inode->gid < currentUsr.group) {
 		printf("\nCan not move '%s'. Permission denied.", filename);
-		return ;
+		return;
 	}
 
-	if(filename_inode == NULL)
+	if (filename_inode == NULL)
 	{
 		printf("\nCan not move '%s'. File doesn't exist.", filename);
-		return ;
+		return;
 	}
 
-	if(path_inode == NULL)
+	if (path_inode == NULL)
 	{
 		name_length = str_len(path);
-		for(i = 0; i < name_length; i++)
-			if(path[i] == '/')
-			{
-				printf("\nCan not move '%s' to '%s'. Directory doesn't exist.", filename, path);
+		for (i = 0; i < name_length; i++)
+			if (path[i] == '/') {
+				printf("\nCan not move '%s' to '%s'. Directory doesn't exist.",
+						filename, path);
 				return;
 			}
 		rename_file(filename_inode->iNode_number, path);
-		return ;
+		return;
 	}
 
 	int init_block = current->data.direct_blocks[0];
-	directoryEntry * dr = (directoryEntry*)calloc(64 * 96, 1);
+	directoryEntry * dr = (directoryEntry*) calloc(64 * 96, 1);
 	read_disk(0, init_block, dr, (BLOCK_SIZE * 12), 0);
-	for(i = 1; i < 96; i++){
-		if( strcmp(filename, dr[i].name) == 1){
+	for (i = 1; i < 96; i++) {
+		if (strcmp(filename, dr[i].name) == 1) {
 			type = dr[i].type;
 			break;
 		}
 	}
 
-	if(type == DIRECTORY)
+	if (type == DIRECTORY)
 	{
 		insert_directory_entry(filename_inode, path_inode, filename);
 
 		int inode_number = filename_inode->iNode_number;
 		int init_block = current->data.direct_blocks[0];
-		directoryEntry * dr = (directoryEntry*)calloc(sizeof(directoryEntry),96);
-		read_disk(0,init_block,dr,BLOCK_SIZE*12,0);
+		directoryEntry * dr = (directoryEntry*) calloc(sizeof(directoryEntry),
+				96);
+		read_disk(0, init_block, dr, BLOCK_SIZE * 12, 0);
 		iNode * parent = fs_get_inode(dr[1].inode);
 		int father_init_block = current->data.direct_blocks[0];
-		directoryEntry * father_dr = (directoryEntry*)calloc(sizeof(directoryEntry),96);
-		read_disk(0,father_init_block,father_dr,BLOCK_SIZE*12,0);
+		directoryEntry * father_dr = (directoryEntry*) calloc(
+				sizeof(directoryEntry), 96);
+		read_disk(0, father_init_block, father_dr, BLOCK_SIZE * 12, 0);
 
-		for ( i = 2; i < 96; i++){
-			if ( father_dr[i].inode == inode_number){
+		for (i = 2; i < 96; i++) {
+			if (father_dr[i].inode == inode_number) {
 				dr[i].type = 0;
 				dr[i].inode = 0;
 				dr[i].lenght = 0;
-				strcopy(dr[i].name,"\0",1 );
+				strcopy(dr[i].name, "\0", 1);
 				break;
 			}
 		}
-		write_disk(0,init_block,dr,BLOCK_SIZE*12,0);
-	}
-	else if( type == FILE)
+		write_disk(0, init_block, dr, BLOCK_SIZE * 12, 0);
+	} else if (type == FILE)
 	{
 		insert_file(filename, 777, path_inode);
 		rmDir(filename);
 	}
 
-	return ;
+	return;
 }
 
-
-void rename_file(int iNode_number, char * new_name)
-{
+void rename_file(int iNode_number, char * new_name) {
 	int i, init_block = current->data.direct_blocks[0];
-	directoryEntry * dr = (directoryEntry*)calloc(sizeof(directoryEntry), 96);
+	directoryEntry * dr = (directoryEntry*) calloc(sizeof(directoryEntry), 96);
 	read_disk(0, init_block, dr, BLOCK_SIZE * 12, 0);
-	for (i = 0; i < 96; i++){
-		if ( dr[i].inode == iNode_number){
-			memcpy(dr[i].name, new_name, str_len(new_name));
+	for (i = 0; i < 96; i++) {
+		if (dr[i].inode == iNode_number) {
+			strcopy(dr[i].name, new_name, str_len(new_name));
 			break;
 		}
 	}
@@ -1304,9 +1298,7 @@ void rename_file(int iNode_number, char * new_name)
 	return;
 }
 
-
-void cp(char * filename, char * path)
-{
+void cp(char * filename, char * path) {
 	int i, name_length, type, ret, j;
 	filename[str_len(filename) - 1] = 0;
 	iNode * path_inode = current;
@@ -1314,69 +1306,66 @@ void cp(char * filename, char * path)
 	iNode * filename_inode = current;
 	filename_inode = parser_path(filename, filename_inode);
 
-	if(filename_inode->gid < currentUsr.group)
-	{
+	if (filename_inode->gid < currentUsr.group) {
 		printf("\nCan not copy '%s'. Permission denied.", filename);
-		return ;
+		return;
 	}
 
-	if(filename_inode == NULL)
+	if (filename_inode == NULL)
 	{
 		printf("\nCan not copy '%s'. File doesn't exist.", filename);
-		return ;
+		return;
 	}
 
-	if(path_inode == NULL)
+	if (path_inode == NULL)
 	{
 		name_length = str_len(path);
-		for(i = 0; i < name_length; i++)
-			if(path[i] == '/')
-			{
-				printf("\nCan not copy '%s' to '%s'. Directory doesn't exist.", filename, path);
+		for (i = 0; i < name_length; i++)
+			if (path[i] == '/') {
+				printf("\nCan not copy '%s' to '%s'. Directory doesn't exist.",
+						filename, path);
 				return;
 			}
 		rename_file(filename_inode->iNode_number, path);
-		return ;
+		return;
 	}
 
 	int init_block = current->data.direct_blocks[0];
-	directoryEntry * dr = (directoryEntry*)calloc(64 * 96, 1);
+	directoryEntry * dr = (directoryEntry*) calloc(64 * 96, 1);
 	read_disk(0, init_block, dr, (BLOCK_SIZE * 12), 0);
-	for(i = 1; i < 96; i++){
-		if( strcmp(filename, dr[i].name) == 1){
+	for (i = 1; i < 96; i++) {
+		if (strcmp(filename, dr[i].name) == 1) {
 			type = dr[i].type;
 			break;
 		}
 	}
 
-	if(type == FILE)
+	if (type == FILE)
 	{
 		cp_file(filename, filename_inode, path_inode);
-	}
-	else if(type == DIRECTORY)
+	} else if (type == DIRECTORY)
 	{
 		recursive_cp(filename, filename_inode, path_inode);
 	}
 
-	return ;
+	return;
 }
 
-void recursive_cp(char * filename, iNode * origin, iNode * destination)
-{
+void recursive_cp(char * filename, iNode * origin, iNode * destination) {
 	int i;
 	iNode * path;
 
-	if(origin->gid < currentUsr.group)
-		return ;
+	if (origin->gid < currentUsr.group)
+		return;
 
 	cp_dir(filename, destination);
 
 	//get new path
 	int init_block = destination->data.direct_blocks[0];
-	directoryEntry * dr = (directoryEntry*)calloc(64 * 96, 1);
+	directoryEntry * dr = (directoryEntry*) calloc(64 * 96, 1);
 	read_disk(0, init_block, dr, (BLOCK_SIZE * 12), 0);
-	for(i = 2; i < 96; i++){
-		if( strcmp(filename, dr[i].name)){
+	for (i = 2; i < 96; i++) {
+		if (strcmp(filename, dr[i].name)) {
 			path = fs_get_inode(dr[i].inode);
 			break;
 		}
@@ -1384,33 +1373,30 @@ void recursive_cp(char * filename, iNode * origin, iNode * destination)
 
 	//search for files and folders
 	init_block = origin->data.direct_blocks[0];
-	dr = (directoryEntry*)calloc(sizeof(directoryEntry), 96);
+	dr = (directoryEntry*) calloc(sizeof(directoryEntry), 96);
 	read_disk(0, init_block, dr, BLOCK_SIZE * 12, 0);
-	for ( i = 2; i < 96; i++)
-	{
+	for (i = 2; i < 96; i++) {
 		if (dr[i].type == FILE)
 		{
 			cp_file(dr[i].name, origin, path);
-		}
-		else if(dr[i].type == DIRECTORY)
+		} else if (dr[i].type == DIRECTORY)
 		{
 			recursive_cp(dr[i].name, fs_get_inode(dr[i].inode), path);
 		}
 	}
 	write_disk(0, init_block, dr, BLOCK_SIZE * 12, 0);
 
-	return ;
+	return;
 }
 
-
-void cp_file(char * filename, iNode * origin, iNode * path_inode)
-{
-	iNode * ret, * aux;
+void cp_file(char * filename, iNode * origin, iNode * path_inode) {
+	iNode * ret, *aux;
 	char * buff;
 	int fd;
 	aux = current;
-	if ( (ret = insert_file(filename, 777, path_inode)) == NULL)
-		return ;
+	if ((ret = insert_file(filename, 777, path_inode)) == NULL
+		)
+		return;
 	insert_fd(ret->iNode_number);
 	current = origin;
 	fd = do_open(filename, 1, 2);
@@ -1424,8 +1410,7 @@ void cp_file(char * filename, iNode * origin, iNode * path_inode)
 	current = aux;
 }
 
-void cp_dir(char * filename, iNode * path_inode)
-{
+void cp_dir(char * filename, iNode * path_inode) {
 	iNode * aux;
 	aux = current;
 	current = path_inode;

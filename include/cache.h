@@ -6,18 +6,16 @@
 #define TRUE 1
 #define OK 1;
 #define ERROR -1;
+#define FREE_BLOCKS 32
+
 
 typedef struct{
 	char data[512];
 	int num_block;
 	int dirty;
+	int access_count;
 }blockVector;
 
-typedef struct{
-	blockVector curr;
-	//blockVectorNode * prev;
-	//blockVectorNode * next;
-}blockVectorNode;
 
 
 void mergesort(blockVector a[], int low, int high);

@@ -82,12 +82,12 @@ void page_fault_handler_wrapper(struct int_params* params) {
 	//printf("\n process in page_fault : %s - p->pdir %d \n", p->name, p->pdir);
 	uint32_t address = 0;
 	__asm__ volatile("MOVL 	%%CR2, %0" : "=r" (address) : );
-	if((int)address < 0){
+	/*if((int)address < 0){
 		return;
-	}
-	printf("address: %d\n",address);
-	printf("PAGE FAULT : err_code:%d TABLE:%d PAGE:%d\n", params->err_code & 0xF,
-			address >> 22, (address >> 12) & 1023);
+	}*/
+	//printf("address: %d\n",address);
+	//printf("PAGE FAULT : err_code:%d TABLE:%d PAGE:%d\n", params->err_code & 0xF,
+	//		address >> 22, (address >> 12) & 1023);
 
 	/*kill the process at this point*/
 	kill(CurrentPID);

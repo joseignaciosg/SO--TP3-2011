@@ -17,6 +17,7 @@ int dirties = 0;
 
 
 
+
 //Busca un index en el array correspondiente al numero de bloque.
 int cache_findblock(int num){
 
@@ -79,6 +80,7 @@ int cache_insertblock(int baseblock, char * insertdata, int amountblocks){
 					fblock = cache_findfreeblock();
 					cache_array[fblock].num_block = j + i;
 					cache_array[fblock].dirty = 0;
+					cache_array[fblock].access_count = 0;
 					//memcpy(cache_array[fblock].data,(insertdata+(512*i)),512);
 				}		
 				cache_freeblocks = cache_freeblocks - cantblocks;
@@ -116,7 +118,8 @@ void cache_removeblocks(int a, int b){
 	for(i=0;i < CACHE_BLOCKS; i++){
 		if( (cache_array[i].num_block >= a) || (cache_array[i].num_block <= b) ){
 			cache_array[i].num_block = -1;
-			cache_array[i].dirty = 0;	
+			cache_array[i].dirty = 0;
+			cache_array[i].access_count = 0;
 			cache_freeblocks++;			
 		}
 	}
@@ -138,6 +141,7 @@ void cache_initarray(){
 	for(i = 0; i < CACHE_BLOCKS; i++){
 		cache_array[i].num_block = -1;
 		cache_array[i].dirty = 0; 
+		cache_array[i].access_count = 0;
 	}
 	return;
 }
@@ -216,12 +220,13 @@ int hipotetical_write(int block, char * buffer, int size){
 
 //Escribe en la cache
 int cache_write(int block, char * data, int size){
-	
+
 	int i;
 	int init_block = cache_findblock(block);
 	for( i = 0; i < ((int)(size/512)+1); i++){
 		memcpy(cache_array[init_block+i].data,data+(512*i),512);
 		cache_array[init_block+i].dirty = 1;//TRUE
+		cache_array[init_block+i].access_count += 1;
 		dirties++;
 	}
 	return size;
@@ -233,11 +238,13 @@ int cache_read(int block, char * data, int size){
 	int init_block = cache_findblock(block);
 	for( i = 0; i < ((int)(size/512)+1); i++){
 		memcpy(data+(512*i),cache_array[init_block+i].data,512);
+		cache_array[init_block+i].access_count += 1;
+
 	}
 	return size;
 }
 
-//Flush bien choto, si lee dirty escribe en disco y lo marca como no flush.
+//Flush , si lee dirty escribe en disco y lo marca como no flush.
 int flushall(){
 
 	int i,size;
@@ -250,6 +257,8 @@ int flushall(){
 		if( cache_array[i].dirty == 1){
 			//disk_write(cache_array[i].num_block, cache_array[i].data,size);
 			cache_array[i].dirty = 0;
+			cache_array[i].access_count = 0;
+
 			dirties--;
 		}
 	}

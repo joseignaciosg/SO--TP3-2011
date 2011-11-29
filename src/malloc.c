@@ -52,7 +52,7 @@ static char bitmapBlocks3[COUNT_BLOCKS3] = { 0 };
 void * getBlock(int type_block, int type_call);
 void * getBlocks(int size, int type_call);
 
-void * malloc(int size) {
+/*void * malloc(int size) {
 	void * temp;
 	//printf("inside malloc\n");
 	if (size < BLOCK_SIZE1) {
@@ -82,7 +82,7 @@ void * calloc(int size, int quant) {
 		temp = getBlocks(size, CALLOC);
 	}
 	return temp;
-}
+}*/
 
 
 
@@ -184,8 +184,12 @@ void * getBlocks(int size, int type_call) {
 
 }
 
+<<<<<<< HEAD
 
 void free(void * p){
+=======
+/*void free(void * p){
+>>>>>>> 7d8cccdcc4381bd0784569e2f5534ed6b59e9309
 	int curr_size;
 	int count;
 	int pos;
@@ -193,7 +197,7 @@ void free(void * p){
 		curr_size = SECOND_BLOCK_SPACE_START - (int)p;
 		count = curr_size / BLOCK_SIZE1;
 		pos = COUNT_BLOCKS1 - count;
-		bitmapBlocks1[pos]=0;
+		bitmapBlocks1[pos] = 0;
 //		printf("\npos: %d \n",pos);
 //		printf("\np: %d \n",(int)p);
 		//is necessary to clean it up?
@@ -218,9 +222,12 @@ void free(void * p){
 
 	}
 
-}
+}*/
 
+<<<<<<< HEAD
 /*
+=======
+>>>>>>> 7d8cccdcc4381bd0784569e2f5534ed6b59e9309
 int nextfree = 0x300000;
 
 
@@ -239,4 +246,4 @@ int nextfree = 0x300000;
  temp[i] = '\0';
  }
  return (void*)temp;
- }*/
+ }

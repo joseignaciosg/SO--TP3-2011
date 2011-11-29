@@ -66,6 +66,7 @@ void SaveESP (int ESP)
 		if(temp->state == RUNNING)
 			temp->state = READY;
 	}
+	//printf("running: %s\n", temp->name);
 	actualKilled = 0;
 	return;
 }

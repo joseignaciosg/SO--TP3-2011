@@ -421,14 +421,9 @@ void end_process(void)
 		if(last100[i] == proc->pid)
 			last100[i] = -1;
 
-<<<<<<< HEAD
-
-	clear_proc_ptable(proc->pid); /*error*/
+	clear_proc_ptable(proc->pid);
 	printf("Welcome\n");
-=======
-	clear_proc_ptable(proc->pid); /*error*/
-	printf("ended process\n");
->>>>>>> 7d8cccdcc4381bd0784569e2f5534ed6b59e9309
+
 	_Sti();
 
 	return ;

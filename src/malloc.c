@@ -184,12 +184,8 @@ void * getBlocks(int size, int type_call) {
 
 }
 
-<<<<<<< HEAD
 
 void free(void * p){
-=======
-/*void free(void * p){
->>>>>>> 7d8cccdcc4381bd0784569e2f5534ed6b59e9309
 	int curr_size;
 	int count;
 	int pos;
@@ -222,12 +218,9 @@ void free(void * p){
 
 	}
 
-}*/
+}
 
-<<<<<<< HEAD
-/*
-=======
->>>>>>> 7d8cccdcc4381bd0784569e2f5534ed6b59e9309
+
 int nextfree = 0x300000;
 
 

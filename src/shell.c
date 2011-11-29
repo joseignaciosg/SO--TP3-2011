@@ -110,9 +110,6 @@ wait(int sec) {
 <<<<<<< HEAD
 }
 */
-=======
-}*/
->>>>>>> 7d8cccdcc4381bd0784569e2f5534ed6b59e9309
 
 void
 showLastCommand() {
@@ -242,7 +239,6 @@ parseBuffer() {
 		k_clear_screen();
 		cleared_screen = TRUE;
 		isFront = 0;
-<<<<<<< HEAD
 	} else if (strcmp("printftest", buffcopy)) {
 	//	putc('\n');
 	//	printfTest();
@@ -250,11 +246,6 @@ parseBuffer() {
 	} else if (strcmp("getCPUSpeed", buffcopy)) {
 		putc('\n');
 	//	printf("CPU Speed: %ld  MHz", getCPUSpeed());
-=======
-	} else if (strcmp("getCPUSpeed", buffcopy)) {
-		putc('\n');
-		//printf("CPU Speed: %ld  MHz", getCPUSpeed());
->>>>>>> 7d8cccdcc4381bd0784569e2f5534ed6b59e9309
 		isFront = 0;
 	} else if (strcmp("help", buffcopy)) {
 		putc('\n');

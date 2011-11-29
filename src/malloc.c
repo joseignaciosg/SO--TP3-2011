@@ -1,12 +1,12 @@
 /********************************** 
- *
- *  malloc.c
- *  	Galindo, Jose Ignacio
- *  	Homovc, Federico
- *  	Loreti, Nicolas
- *		ITBA 2011
- *
- ***********************************/
+*
+*  malloc.c
+*  	Galindo, Jose Ignacio
+*  	Homovc, Federico
+*  	Loreti, Nicolas
+*		ITBA 2011
+*
+***********************************/
 
 
 #define MALLOC 1

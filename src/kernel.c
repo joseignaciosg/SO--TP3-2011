@@ -650,9 +650,9 @@ void int_79(size_t call, size_t param){
 	case CD_COM:
 		cd_in_kernel((char *)param);/*param == path*/
 		break;
-	case LINK_COM:
+	/*case LINK_COM:
 		link_in_kernel((link_struct *)param);
-		break;
+		break;*/
 	case CREAT_COM:
 		creat_in_kernel((creat_param *)param);
 		break;
@@ -663,6 +663,7 @@ void int_79(size_t call, size_t param){
 		semrm_in_kernel(param);
 		break;
 	}
+		
 
 }
 
